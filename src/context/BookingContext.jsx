@@ -6,61 +6,28 @@ import { generateId } from '../utils/helpers';
 
 const BookingContext = createContext();
 
-const INITIAL_HOTEL_BOOKINGS = [
-  {
-    id: "HTL-UD-84920",
-    hotelId: "taj-lake-palace-udaipur",
-    hotelName: "Taj Lake Palace",
-    destinationId: "udaipur",
-    destinationName: "Udaipur",
-    city: "Udaipur",
-    heroImage: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop",
-    roomTypeId: "taj_lake_view_luxury",
-    roomTypeName: "Luxury Lake View Room",
-    checkInDate: "2026-10-12",
-    checkOutDate: "2026-10-15",
-    nights: 3,
-    guests: { adults: 2, children: 0, rooms: 1 },
-    guestName: "Aryan Sharma",
-    guestEmail: "aryan.sharma@example.com",
-    guestPhone: "+91 98765 43210",
-    specialRequests: "High floor lake view room requested. Celebrating anniversary.",
-    pricePerNight: 42000,
-    taxes: 15120, // 12% GST
-    totalPrice: 141120,
-    status: "Confirmed", // Confirmed, Completed, Cancelled
-    bookedAt: "2026-09-20T10:30:00.000Z",
-    paymentMethod: "Pay at Property / Guaranteed with Card"
-  }
-];
-
-const INITIAL_RESTAURANT_BOOKINGS = [
-  {
-    id: "RES-UD-39210",
-    restaurantId: "ambrai-restaurant-udaipur",
-    restaurantName: "Ambrai - Amet Haveli",
-    destinationId: "udaipur",
-    destinationName: "Udaipur",
-    city: "Udaipur",
-    heroImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop",
-    date: "2026-10-13",
-    timeSlot: "06:30 PM (Sunset Slot)",
-    partySize: 2,
-    seatingArea: "Lakeside Water-Edge Table",
-    guestName: "Aryan Sharma",
-    guestEmail: "aryan.sharma@example.com",
-    guestPhone: "+91 98765 43210",
-    occasion: "Romantic Date / Anniversary",
-    specialRequests: "Water-facing table with candle arrangement if possible.",
-    status: "Confirmed", // Confirmed, Completed, Cancelled
-    bookedAt: "2026-09-20T11:15:00.000Z"
-  }
-];
+const INITIAL_HOTEL_BOOKINGS = [];
+const INITIAL_RESTAURANT_BOOKINGS = [];
 
 export function BookingProvider({ children }) {
   const [hotelBookings, setHotelBookings] = useLocalStorage('tripcanvas_hotel_bookings', INITIAL_HOTEL_BOOKINGS);
   const [restaurantBookings, setRestaurantBookings] = useLocalStorage('tripcanvas_restaurant_bookings', INITIAL_RESTAURANT_BOOKINGS);
   const { showToast } = useToast();
+
+  // Remove legacy static mock bookings if previously stored in localStorage
+  React.useEffect(() => {
+    setHotelBookings((prev) => {
+      if (!Array.isArray(prev)) return [];
+      const hasLegacy = prev.some((b) => b && b.id === 'HTL-UD-84920');
+      return hasLegacy ? prev.filter((b) => b && b.id !== 'HTL-UD-84920') : prev;
+    });
+
+    setRestaurantBookings((prev) => {
+      if (!Array.isArray(prev)) return [];
+      const hasLegacy = prev.some((r) => r && r.id === 'RES-UD-39210');
+      return hasLegacy ? prev.filter((r) => r && r.id !== 'RES-UD-39210') : prev;
+    });
+  }, [setHotelBookings, setRestaurantBookings]);
 
   const triggerCelebration = useCallback(() => {
     try {

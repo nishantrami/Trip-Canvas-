@@ -5,11 +5,22 @@ import { DESTINATIONS } from '../data/destinations';
 
 const FavoriteContext = createContext();
 
-const INITIAL_FAVORITES = ['udaipur', 'kashmir', 'goa', 'bali'];
+const INITIAL_FAVORITES = [];
 
 export function FavoriteProvider({ children }) {
   const [favoriteIds, setFavoriteIds] = useLocalStorage('tripcanvas_favorites', INITIAL_FAVORITES);
   const { showToast } = useToast();
+
+  // Remove legacy static mock favorites if previously stored in localStorage
+  React.useEffect(() => {
+    setFavoriteIds((prev) => {
+      if (!Array.isArray(prev)) return [];
+      const isLegacyMock =
+        prev.length === 4 &&
+        ['udaipur', 'kashmir', 'goa', 'bali'].every((id) => prev.includes(id));
+      return isLegacyMock ? [] : prev;
+    });
+  }, [setFavoriteIds]);
 
   const isFavorite = useCallback(
     (destinationId) => {
