@@ -68,9 +68,9 @@ export function RestaurantReservationModal({ isOpen, onClose, restaurant }) {
       const reservationData = {
         restaurantId: restaurant.id,
         restaurantName: restaurant.name,
-        destinationId: restaurant.destinationId || 'udaipur',
-        destinationName: restaurant.destinationName || restaurant.city || 'Udaipur',
-        city: restaurant.city || 'Udaipur',
+        destinationId: restaurant.destinationId || '',
+        destinationName: restaurant.destinationName || restaurant.city || restaurant.name,
+        city: restaurant.city || '',
         heroImage: restaurant.heroImage,
         date,
         timeSlot,

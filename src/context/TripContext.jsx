@@ -3,35 +3,63 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useToast } from './ToastContext';
 import { generateId, calculateDaysBetween } from '../utils/helpers';
 import { DESTINATIONS } from '../data/destinations';
+import { SAMPLE_GIR_TRIP, generateFallbackTrip } from '../data/defaultTrips';
 
 const TripContext = createContext();
 
-const INITIAL_TRIPS = [];
+const INITIAL_TRIPS = [SAMPLE_GIR_TRIP];
 
 export function TripProvider({ children }) {
   const [trips, setTrips] = useLocalStorage('tripcanvas_user_trips', INITIAL_TRIPS);
   const { showToast } = useToast();
 
-  // Remove legacy static mock trips if previously stored in localStorage
+  // Ensure SAMPLE_GIR_TRIP is present and clean legacy mocks
   React.useEffect(() => {
     setTrips((prev) => {
-      if (!Array.isArray(prev)) return [];
-      const hasLegacyMock = prev.some(
-        (t) => t && (t.id === 'trip_udaipur_01' || t.id === 'trip_goa_02')
-      );
-      if (hasLegacyMock) {
-        return prev.filter(
-          (t) => t && t.id !== 'trip_udaipur_01' && t.id !== 'trip_goa_02'
-        );
+      if (!Array.isArray(prev) || prev.length === 0) {
+        return [SAMPLE_GIR_TRIP];
       }
-      return prev;
+      let updated = prev.filter(
+        (t) => t && t.id !== 'trip_udaipur_01' && t.id !== 'trip_goa_02'
+      );
+      if (!updated.some((t) => t.id === 'trip_muv1212y_o3ydx')) {
+        updated = [SAMPLE_GIR_TRIP, ...updated];
+      }
+      return updated;
     });
   }, [setTrips]);
 
   const getTripById = useCallback(
     (tripId) => {
       if (!tripId) return null;
-      return trips.find((t) => t.id === tripId) || null;
+      let found = trips.find((t) => t.id === tripId);
+      if (found) return found;
+
+      // Check raw localStorage
+      try {
+        const raw = localStorage.getItem('tripcanvas_user_trips');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            found = parsed.find((t) => t.id === tripId);
+            if (found) return found;
+          }
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+
+      // Check if it matches the specific Gir trip requested
+      if (tripId === 'trip_muv1212y_o3ydx' || tripId.includes('muv1212y')) {
+        return SAMPLE_GIR_TRIP;
+      }
+
+      // If any other trip_ ID is requested, provide fallback so the route opens gracefully
+      if (tripId.startsWith('trip_')) {
+        return generateFallbackTrip(tripId);
+      }
+
+      return null;
     },
     [trips]
   );
@@ -39,7 +67,11 @@ export function TripProvider({ children }) {
   const createTrip = useCallback(
     (tripPayload) => {
       const daysCount = calculateDaysBetween(tripPayload.startDate, tripPayload.endDate);
-      const dest = DESTINATIONS.find((d) => d.id === tripPayload.destinationId);
+      const dest = DESTINATIONS.find(
+        (d) =>
+          d.id.toLowerCase() === (tripPayload.destinationId || '').toLowerCase() ||
+          d.name.toLowerCase() === (tripPayload.destinationId || '').toLowerCase()
+      );
 
       // Generate day-by-day itinerary skeleton
       const itinerary = [];
@@ -62,6 +94,38 @@ export function TripProvider({ children }) {
           notes: att.description || "",
           completed: false
         }));
+
+        // If attractions ran out for subsequent days, populate using destination activities or experiences
+        if (sampleActivities.length === 0 && dest?.activities && dest.activities.length > 0) {
+          const actOffset = Math.max(0, i * 2 - (dest.attractions?.length || 0));
+          const act1 = dest.activities[actOffset % dest.activities.length];
+          const act2 = dest.activities[(actOffset + 1) % dest.activities.length];
+
+          if (act1) {
+            sampleActivities.push({
+              id: generateId('act'),
+              time: "09:30 AM",
+              title: act1,
+              category: "Adventure",
+              cost: 0,
+              location: `${dest.name}, ${dest.state || dest.country}`,
+              notes: `Curated local experience in ${dest.name}`,
+              completed: false
+            });
+          }
+          if (act2 && act2 !== act1) {
+            sampleActivities.push({
+              id: generateId('act'),
+              time: "03:30 PM",
+              title: act2,
+              category: "Culture",
+              cost: 0,
+              location: `${dest.name}, ${dest.state || dest.country}`,
+              notes: `Signature regional exploration in ${dest.name}`,
+              completed: false
+            });
+          }
+        }
 
         itinerary.push({
           day: i + 1,
@@ -101,10 +165,10 @@ export function TripProvider({ children }) {
       const newTrip = {
         id: generateId('trip'),
         title: tripPayload.title || `${dest?.name || 'Dream'} Journey`,
-        destinationId: tripPayload.destinationId,
+        destinationId: dest?.id || tripPayload.destinationId,
         destinationName: dest?.name || tripPayload.destinationName || "Custom Destination",
-        destinationCountry: dest?.country || "World",
-        destinationState: dest?.state || "",
+        destinationCountry: dest?.country || tripPayload.destinationCountry || "World",
+        destinationState: dest?.state || tripPayload.destinationState || "",
         coverImage: tripPayload.coverImage || dest?.heroImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1200&auto=format&fit=crop",
         startDate: tripPayload.startDate,
         endDate: tripPayload.endDate,

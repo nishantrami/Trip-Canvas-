@@ -140,7 +140,7 @@ export function AttractionCard({
           </span>
           {attraction.coordinates && (
             <span className="attraction-meta-pill text-muted" title="Geographical location">
-              <MapPin size={12} /> {destinationName || 'Udaipur'}
+              <MapPin size={12} /> {destinationName || attraction.city || 'Sightseeing'}
             </span>
           )}
         </div>

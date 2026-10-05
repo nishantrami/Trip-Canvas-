@@ -51,14 +51,20 @@ export function CreateTrip() {
   const prefillDestId = location.state?.prefillDestinationId || '';
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedCoverType, setSelectedCoverType] = useState('hotel'); // 'hotel' or 'destination'
+  const [selectedCoverType, setSelectedCoverType] = useState('destination'); // default to destination cover
+  const [isCustomTitle, setIsCustomTitle] = useState(false);
+  const [isCustomBudget, setIsCustomBudget] = useState(false);
+
   const [formData, setFormData] = useState(() => {
-    const initialDestId = prefillDestId || 'udaipur';
-    const initialHotels = hotelService.getHotelsByDestination(initialDestId);
-    const topHotel = initialHotels.find(h => h.id === 'zostel-lake-pichola-udaipur') || initialHotels[0] || null;
+    const initialDestId = prefillDestId || '';
+    const initialDest = initialDestId ? destinationService.getDestinationById(initialDestId) : null;
+    const initialHotels = initialDestId ? hotelService.getHotelsByDestination(initialDestId) : [];
+    const topHotel = initialHotels[0] || null;
+    const initialTags = initialDest?.tags?.slice(0, 3) || ['Culture', 'Food & Dining', 'Nature & Lakes'];
+
     return {
       destinationId: initialDestId,
-      title: '',
+      title: initialDest ? `${initialDest.name} Couple` : '',
       startDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0], // 7 days from now
       endDate: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0], // 10 days from now
       travelers: 2,
@@ -66,8 +72,8 @@ export function CreateTrip() {
       selectedHotelId: topHotel ? topHotel.id : '',
       selectedHotel: topHotel,
       selectedRoom: topHotel?.roomTypes?.[0] || null,
-      interests: ['Culture', 'Food & Dining', 'History & Forts'],
-      budget: 18000,
+      interests: initialTags,
+      budget: initialDest ? (initialDest.averageBudget || 4000) * 3 * 2 : 15000,
       notes: ''
     };
   });
@@ -79,11 +85,13 @@ export function CreateTrip() {
   const [error, setError] = useState('');
 
   const allDestinations = destinationService.getAllDestinations();
-  const selectedDest = destinationService.getDestinationById(formData.destinationId) || allDestinations[0];
+  const selectedDest = formData.destinationId
+    ? destinationService.getDestinationById(formData.destinationId)
+    : null;
 
   const durationDays = calculateDaysBetween(formData.startDate, formData.endDate);
 
-  // Auto calculate suggested budget including hotel stay if selected
+  // Auto calculate suggested budget & title when parameters change
   useEffect(() => {
     if (selectedDest) {
       const dailyEstimate = (selectedDest.averageBudget || 4000) * durationDays * (formData.travelers || 1);
@@ -93,11 +101,11 @@ export function CreateTrip() {
 
       setFormData((prev) => ({
         ...prev,
-        budget: prev.budget || (dailyEstimate + hotelTotal),
-        title: prev.title || `${selectedDest.name} ${formData.travelStyle || 'Escape'}`
+        budget: isCustomBudget ? prev.budget : (dailyEstimate + hotelTotal),
+        title: isCustomTitle ? prev.title : `${selectedDest.name} ${prev.travelStyle || 'Escape'}`
       }));
     }
-  }, [formData.destinationId, durationDays, formData.travelers, formData.travelStyle, formData.selectedHotel, formData.selectedRoom]);
+  }, [selectedDest, durationDays, formData.travelers, formData.travelStyle, formData.selectedHotel, formData.selectedRoom, isCustomTitle, isCustomBudget]);
 
   const filteredDestList = allDestinations.filter((d) =>
     d.name.toLowerCase().includes(destSearchQuery.toLowerCase()) ||
@@ -165,15 +173,28 @@ export function CreateTrip() {
   };
 
   const handleSelectDestination = (destId) => {
+    const dest = destinationService.getDestinationById(destId);
     const hotels = hotelService.getHotelsByDestination(destId);
-    const topHotel = hotels.find(h => h.id.includes('zostel')) || hotels[0] || null;
+    const topHotel = hotels[0] || null;
+    const destDays = durationDays || 3;
+    const destTravelers = formData.travelers || 2;
+    const dailyEstimate = (dest?.averageBudget || 4000) * destDays * destTravelers;
+    const hotelTotal = topHotel ? (topHotel.roomTypes?.[0]?.price || topHotel.pricePerNight) * destDays : 0;
+    const relevantInterests = (dest?.tags && dest.tags.length > 0)
+      ? dest.tags.slice(0, 3)
+      : ['Nature & Lakes', 'Culture', 'Photography'];
+
     setFormData((prev) => ({
       ...prev,
       destinationId: destId,
+      title: !isCustomTitle && dest ? `${dest.name} ${prev.travelStyle || 'Escape'}` : prev.title,
+      budget: !isCustomBudget ? (dailyEstimate + hotelTotal) : prev.budget,
       selectedHotelId: topHotel ? topHotel.id : '',
       selectedHotel: topHotel,
-      selectedRoom: topHotel?.roomTypes?.[0] || null
+      selectedRoom: topHotel?.roomTypes?.[0] || null,
+      interests: relevantInterests
     }));
+    setError('');
   };
 
   const handleNext = () => {
@@ -201,14 +222,18 @@ export function CreateTrip() {
   };
 
   const handleFinalSubmit = () => {
+    const finalDest = selectedDest || destinationService.getDestinationById(formData.destinationId);
+    const finalTitle = formData.title.trim() || `${finalDest?.name || 'Dream'} Journey`;
     const reviewCover = (selectedCoverType === 'hotel' && formData.selectedHotel?.heroImage)
       ? formData.selectedHotel.heroImage
-      : selectedDest?.heroImage;
+      : (finalDest?.heroImage || formData.selectedHotel?.heroImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1200&auto=format&fit=crop");
 
     const created = createTrip({
-      title: formData.title || `${selectedDest?.name} Journey`,
+      title: finalTitle,
       destinationId: formData.destinationId,
-      destinationName: selectedDest?.name,
+      destinationName: finalDest?.name || 'Custom Destination',
+      destinationState: finalDest?.state || '',
+      destinationCountry: finalDest?.country || 'India',
       coverImage: reviewCover,
       startDate: formData.startDate,
       endDate: formData.endDate,
@@ -393,7 +418,13 @@ export function CreateTrip() {
                     <button
                       key={style}
                       type="button"
-                      onClick={() => setFormData({ ...formData, travelStyle: style })}
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          travelStyle: style,
+                          title: !isCustomTitle && selectedDest ? `${selectedDest.name} ${style}` : prev.title
+                        }))
+                      }
                       className={`chip ${formData.travelStyle === style ? 'active-accent' : ''}`}
                     >
                       {style}
@@ -411,10 +442,10 @@ export function CreateTrip() {
               <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                 <div>
                   <h3 className="heading-3 mb-1">
-                    Select Your Stay in {selectedDest?.name}
+                    Select Your Stay in {selectedDest?.name || 'Your Destination'}
                   </h3>
                   <p className="text-muted text-xs">
-                    Choose a verified palace, boutique haveli, or lakeside resort ({filteredHotels.length} available from ₹2,000 to ₹42,000)
+                    Choose a verified eco-lodge, heritage haveli, or boutique stay ({filteredHotels.length} available)
                   </p>
                 </div>
 
@@ -614,7 +645,10 @@ export function CreateTrip() {
                   step="500"
                   className="form-control text-lg font-bold"
                   value={formData.budget}
-                  onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                  onChange={(e) => {
+                    setIsCustomBudget(true);
+                    setFormData({ ...formData, budget: Number(e.target.value) });
+                  }}
                 />
               </div>
 
@@ -624,7 +658,10 @@ export function CreateTrip() {
                   <button
                     key={amount}
                     type="button"
-                    onClick={() => setFormData({ ...formData, budget: amount })}
+                    onClick={() => {
+                      setIsCustomBudget(true);
+                      setFormData({ ...formData, budget: amount });
+                    }}
                     className={`chip ${Number(formData.budget) === amount ? 'active' : ''}`}
                   >
                     {formatCurrency(amount)}
@@ -657,22 +694,22 @@ export function CreateTrip() {
               <div className="trip-review-summary-card mb-6">
                 <div className="review-media-header">
                   <img
-                    src={selectedCoverType === 'hotel' && formData.selectedHotel?.heroImage ? formData.selectedHotel.heroImage : (selectedDest?.heroImage || formData.selectedHotel?.heroImage)}
-                    alt={formData.title || selectedDest?.name}
+                    src={selectedCoverType === 'hotel' && formData.selectedHotel?.heroImage ? formData.selectedHotel.heroImage : (selectedDest?.heroImage || formData.selectedHotel?.heroImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1200&auto=format&fit=crop")}
+                    alt={formData.title || selectedDest?.name || 'Trip Cover'}
                     className="review-cover-img"
                   />
                   <div className="review-media-overlay" />
                   <div className="review-header-info">
                     <span className="badge badge-accent mb-1">
-                      {selectedCoverType === 'hotel' && formData.selectedHotel ? (formData.selectedHotel.badge || formData.selectedHotel.type) : selectedDest?.category}
+                      {selectedCoverType === 'hotel' && formData.selectedHotel ? (formData.selectedHotel.badge || formData.selectedHotel.type) : (selectedDest?.category || 'Nature')}
                     </span>
                     <h3 className="text-2xl font-bold text-white">
-                      {selectedCoverType === 'hotel' && formData.selectedHotel ? formData.selectedHotel.name : selectedDest?.name}
+                      {selectedCoverType === 'hotel' && formData.selectedHotel ? formData.selectedHotel.name : (selectedDest?.name || formData.title || 'Your Trip')}
                     </h3>
                     <p className="text-white-muted text-sm">
                       {selectedCoverType === 'hotel' && formData.selectedHotel
-                        ? `${formData.selectedHotel.nearLocation}, ${selectedDest?.name}`
-                        : `${selectedDest?.name}, ${selectedDest?.country}`}
+                        ? `${formData.selectedHotel.nearLocation || formData.selectedHotel.address || ''}, ${selectedDest?.name || ''}`
+                        : `${selectedDest?.name || 'Destination'}, ${selectedDest?.state ? selectedDest.state + ', ' : ''}${selectedDest?.country || 'India'}`}
                     </p>
                   </div>
 
@@ -704,8 +741,11 @@ export function CreateTrip() {
                       type="text"
                       className="form-control mt-1"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g. Udaipur Royal Escape"
+                      onChange={(e) => {
+                        setIsCustomTitle(true);
+                        setFormData({ ...formData, title: e.target.value });
+                      }}
+                      placeholder={`e.g. ${selectedDest?.name || 'Gir National Park'} Royal Safari Escape`}
                     />
                   </div>
 
@@ -860,7 +900,7 @@ export function CreateTrip() {
                         </div>
                         <div className="flex-1">
                           <h5 className="font-bold text-sm text-primary">No hotel selected for this trip</h5>
-                          <p className="text-xs text-muted">You can add a luxury palace or boutique stay in {selectedDest?.name} anytime.</p>
+                          <p className="text-xs text-muted">You can add a luxury palace, safari lodge or boutique stay in {selectedDest?.name || 'your destination'} anytime.</p>
                         </div>
                         <button
                           type="button"
@@ -868,7 +908,7 @@ export function CreateTrip() {
                           className="btn btn-primary btn-sm"
                         >
                           <Building size={14} />
-                          <span>Select Hotel in {selectedDest?.name}</span>
+                          <span>Select Hotel in {selectedDest?.name || 'Destination'}</span>
                         </button>
                       </div>
                     )}

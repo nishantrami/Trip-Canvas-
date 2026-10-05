@@ -94,9 +94,9 @@ export function HotelBookingModal({ isOpen, onClose, hotel, preselectedRoom = nu
       const bookingData = {
         hotelId: hotel.id,
         hotelName: hotel.name,
-        destinationId: hotel.destinationId || 'udaipur',
-        destinationName: hotel.destinationName || hotel.city || 'Udaipur',
-        city: hotel.city || 'Udaipur',
+        destinationId: hotel.destinationId || '',
+        destinationName: hotel.destinationName || hotel.city || hotel.name,
+        city: hotel.city || '',
         heroImage: hotel.heroImage,
         roomTypeId: currentRoom.id,
         roomTypeName: currentRoom.name,

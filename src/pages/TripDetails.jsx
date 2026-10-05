@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useTrips } from '../context/TripContext';
 import { destinationService } from '../services/destinationService';
+import { hotelService } from '../services/hotelService';
 import { HOTELS } from '../data/hotels';
 import { ItineraryTimeline } from '../components/trip/ItineraryTimeline';
 import { BudgetCard } from '../components/budget/BudgetCard';
@@ -64,7 +65,7 @@ const TRIP_DETAIL_TABS = [
 export function TripDetails() {
   const { tripId } = useParams();
   const navigate = useNavigate();
-  const { trips, updateTrip, deleteTrip } = useTrips();
+  const { trips, getTripById, updateTrip, deleteTrip } = useTrips();
   const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -79,7 +80,7 @@ export function TripDetails() {
   const [hotelFilterTier, setHotelFilterTier] = useState('all');
   const [hotelSortOrder, setHotelSortOrder] = useState('recommended');
 
-  const trip = trips.find((t) => t.id === tripId);
+  const trip = (getTripById ? getTripById(tripId) : null) || trips.find((t) => t.id === tripId);
   const destination = trip ? destinationService.getDestinationById(trip.destinationId) : null;
 
   const HOTEL_BUDGET_TIERS = [
@@ -100,7 +101,7 @@ export function TripDetails() {
   // Compute available hotels for the trip destination
   const destinationHotels = React.useMemo(() => {
     if (!trip) return [];
-    let list = HOTELS.filter((h) => h.destinationId === trip.destinationId);
+    let list = hotelService.getHotelsByDestination(trip.destinationId);
     if (list.length === 0) {
       list = HOTELS;
     }
@@ -177,28 +178,13 @@ export function TripDetails() {
     return list;
   }, [destination, selectedPlaceType, placeSearchQuery]);
 
-  const [loadedTripId, setLoadedTripId] = useState(null);
-  const isLoading = loadedTripId !== tripId;
-
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    const timer = setTimeout(() => {
-      setLoadedTripId(tripId);
-    }, 550);
-    return () => clearTimeout(timer);
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) {
+      // scroll fallback safe
+    }
   }, [tripId]);
-
-  if (isLoading) {
-    return (
-      <DetailsLoadingAnimation
-        type="trip"
-        destinationName={trip?.title || 'Trip Details'}
-        state={destination?.name || trip?.destinationName}
-        country={destination?.country}
-        heroImage={trip?.coverImage || destination?.heroImage}
-      />
-    );
-  }
 
   if (!trip) {
     return (
@@ -717,7 +703,7 @@ export function TripDetails() {
 
                     <div className="absolute bottom-4 left-4 right-4 text-white">
                       <p className="text-sm mb-1 italic" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                        "{trip.selectedHotel.tagline || 'Experience timeless hospitality and tranquil lakefront grandeur'}"
+                        "{trip.selectedHotel.tagline || 'Experience timeless hospitality and tranquil surroundings'}"
                       </p>
                     </div>
                   </div>
@@ -789,7 +775,7 @@ export function TripDetails() {
                       <div className="mb-6">
                         <h4 className="heading-3 mb-2">About this Property</h4>
                         <p className="body-text text-secondary leading-relaxed">
-                          {trip.selectedHotel.description || 'Built with classical Mewari architecture, offering sweeping views, royal courtyard dining, and exceptional personalized hospitality.'}
+                          {trip.selectedHotel.description || 'Offering scenic vistas, fine dining, and exceptional personalized hospitality for an unforgettable stay.'}
                         </p>
                       </div>
 

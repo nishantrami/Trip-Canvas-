@@ -60,22 +60,9 @@ export function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/my-trips"
-            element={
-              <ProtectedRoute>
-                <MyTrips />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my-trips/:tripId"
-            element={
-              <ProtectedRoute>
-                <TripDetails />
-              </ProtectedRoute>
-            }
-          />
+          {/* Trip Workspace - Accessible for viewing & sharing itineraries */}
+          <Route path="/my-trips" element={<MyTrips />} />
+          <Route path="/my-trips/:tripId" element={<TripDetails />} />
           <Route
             path="/favorites"
             element={
