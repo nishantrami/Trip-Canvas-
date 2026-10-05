@@ -22,15 +22,30 @@ import { pageVariants } from '../animations/motionVariants';
 const DESTINATION_OPTIONS = [
   { id: 'all', label: 'All Cities' },
   { id: 'udaipur', label: 'Udaipur, Rajasthan', badge: 'Lakefront & Rooftops' },
-  { id: 'goa', label: 'Goa', badge: 'Beach Tavernas' },
-  { id: 'jaipur', label: 'Jaipur, Rajasthan', badge: 'Fort Dining' }
+  { id: 'goa', label: 'Goa', badge: 'Beach Tavernas & Seafood' },
+  { id: 'jaipur', label: 'Jaipur, Rajasthan', badge: 'Fort Dining & Royal Thali' },
+  { id: 'manali', label: 'Manali, Himachal', badge: 'Riverside Trout & Cafes' },
+  { id: 'kashmir', label: 'Kashmir (Srinagar & Dal Lake)', badge: 'Traditional Wazwan & Kahwa' },
+  { id: 'kerala', label: 'Kerala (Kochi & Alleppey)', badge: 'Coastal Seafood & Appams' },
+  { id: 'mumbai', label: 'Mumbai, Maharashtra', badge: 'Coastal Crabs & Irani Cafes' },
+  { id: 'delhi', label: 'Delhi NCR', badge: 'Mughlai & Butter Chicken' },
+  { id: 'ahmedabad', label: 'Ahmedabad, Gujarat', badge: 'Royal Gujarati Thali' },
+  { id: 'kutch', label: 'Rann of Kutch, Gujarat', badge: 'Kutchi Rotla & Dhaba' },
+  { id: 'gir', label: 'Gir National Park, Gujarat', badge: 'Organic Farm Dining' },
+  { id: 'saputara', label: 'Saputara, Gujarat', badge: 'Hill Valley Pure Veg' },
+  { id: 'dubai', label: 'Dubai, UAE', badge: 'Middle Eastern Grills & Tea' },
+  { id: 'bali', label: 'Bali, Indonesia', badge: 'Ricefield Ducks & Oceanfront' },
+  { id: 'paris', label: 'Paris, France', badge: 'Historic Brasseries & Cafes' },
+  { id: 'singapore', label: 'Singapore', badge: 'Chili Crab & Satay Street' },
+  { id: 'london', label: 'London, UK', badge: 'Bombay Cafes & Historic Roasts' },
+  { id: 'tokyo', label: 'Tokyo, Japan', badge: 'Ramen Booths & Izakayas' }
 ];
 
 const RESTAURANT_BUDGET_TIERS = [
-  { id: 'all', label: 'All Budgets', min: 0, max: 20000 },
-  { id: 'budget', label: 'Under ₹800 (Street & Royal Thalis)', min: 0, max: 800 },
-  { id: 'mid', label: '₹800 – ₹2,000 (Lakeside & Cafes)', min: 800, max: 2000 },
-  { id: 'fine', label: '₹2,000+ (Rooftops & Palace Dining)', min: 2000, max: 20000 }
+  { id: 'all', label: 'All Budgets (₹500 – ₹3,000)', min: 0, max: 20000 },
+  { id: 'budget', label: '₹500 – ₹1,000 (Casual & Street Thalis)', min: 500, max: 1000 },
+  { id: 'mid', label: '₹1,000 – ₹2,000 (Boutique & Cafes)', min: 1000, max: 2000 },
+  { id: 'fine', label: '₹2,000 – ₹3,000 (Fine Dining & Scenic Rooftops)', min: 2000, max: 3000 }
 ];
 
 export function Restaurants() {
@@ -114,13 +129,13 @@ export function Restaurants() {
         <div className="container hotels-hero-content">
           <div className="max-w-3xl">
             <span className="badge badge-accent mb-3">
-              <Sparkles size={13} /> Sunset Lakefront & Royal Cuisine
+              <Sparkles size={13} /> Handcrafted Dining Across Top Destinations
             </span>
             <h1 className="heading-display text-white mb-3">
               Reserve Tables at Premier Restaurants
             </h1>
             <p className="text-white-muted text-lg mb-6 leading-relaxed">
-              From water-level candlelight tables facing Udaipur’s illuminated City Palace to royal island palaces and authentic 24-dish Mewari thalis.
+              From Goan coastal seafood shacks and Old Delhi Mughlai feasts to Kashmiri wazwan and Rajasthani royal thalis, explore verified dining from <strong>₹500 to ₹3,000 for two</strong>.
             </p>
 
             {/* Quick Destination Pills */}
@@ -150,15 +165,15 @@ export function Restaurants() {
               <Award size={18} className="text-accent" />
               <div>
                 <strong>Curated Culinary Excellence</strong>
-                <span>Top-rated fine dining & rooftops</span>
+                <span>Top-rated local legends & rooftops</span>
               </div>
             </div>
             <div className="value-strip-divider" />
             <div className="value-strip-item">
               <Wine size={18} className="text-accent" />
               <div>
-                <strong>Prime Lake & City Views</strong>
-                <span>Sunset slots & private cabanas</span>
+                <strong>Curated Price Range</strong>
+                <span>Best tables from ₹500 to ₹3,000 for 2</span>
               </div>
             </div>
             <div className="value-strip-divider" />
@@ -183,7 +198,7 @@ export function Restaurants() {
               <Search size={18} className="search-input-icon" />
               <input
                 type="text"
-                placeholder="Search restaurant, cuisine, dish (e.g. Laal Maas, Ambrai, Thali)..."
+                placeholder="Search restaurant, cuisine, dish (e.g. Biryani, Crab, Wazwan, Thali)..."
                 className="form-input search-input-with-icon"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -213,8 +228,8 @@ export function Restaurants() {
                 onChange={(e) => setSortBy(e.target.value)}
               >
                 <option value="recommended">Sort: Recommended</option>
-                <option value="cost-low">Cost: Low to High (From ₹550)</option>
-                <option value="cost-high">Cost: High to Low (From ₹5,500)</option>
+                <option value="cost-low">Cost: Low to High (From ₹500)</option>
+                <option value="cost-high">Cost: High to Low (Up to ₹3,000)</option>
                 <option value="rating-high">Highest Rated (★ 4.9+)</option>
                 <option value="popularity">Most Popular Dining</option>
               </select>

@@ -8,6 +8,7 @@ import { BookingProvider } from './context/BookingContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { AppRoutes } from './routes/AppRoutes';
+import { TopLoadingBar } from './components/common/TopLoadingBar';
 
 export function App() {
   return (
@@ -18,6 +19,7 @@ export function App() {
             <TripProvider>
               <BookingProvider>
                 <div className="app-container">
+                  <TopLoadingBar />
                   <Navbar />
                   <main className="main-content">
                     <AppRoutes />

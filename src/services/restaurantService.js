@@ -1,4 +1,4 @@
-import { RESTAURANTS, RESTAURANT_CUISINE_FILTERS } from '../data/restaurants';
+import { RESTAURANTS, RESTAURANT_CUISINE_FILTERS } from '../data/restaurants.js';
 
 export const restaurantService = {
   getAllRestaurants: () => {

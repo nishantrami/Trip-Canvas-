@@ -49,6 +49,7 @@ import { formatDateRange } from '../utils/helpers';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useToast } from '../context/ToastContext';
 import { pageVariants } from '../animations/motionVariants';
+import { DetailsLoadingAnimation } from '../components/common/DetailsLoadingAnimation';
 
 const TRIP_DETAIL_TABS = [
   { id: 'overview', label: 'Trip Overview', icon: Sparkles },
@@ -175,6 +176,29 @@ export function TripDetails() {
     }
     return list;
   }, [destination, selectedPlaceType, placeSearchQuery]);
+
+  const [loadedTripId, setLoadedTripId] = useState(null);
+  const isLoading = loadedTripId !== tripId;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    const timer = setTimeout(() => {
+      setLoadedTripId(tripId);
+    }, 550);
+    return () => clearTimeout(timer);
+  }, [tripId]);
+
+  if (isLoading) {
+    return (
+      <DetailsLoadingAnimation
+        type="trip"
+        destinationName={trip?.title || 'Trip Details'}
+        state={destination?.name || trip?.destinationName}
+        country={destination?.country}
+        heroImage={trip?.coverImage || destination?.heroImage}
+      />
+    );
+  }
 
   if (!trip) {
     return (

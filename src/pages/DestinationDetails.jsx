@@ -14,12 +14,10 @@ import {
   Lightbulb,
   Check,
   ChevronLeft,
-  Eye,
   Info,
   Layers,
   Building,
   Sparkles,
-  SlidersHorizontal,
   Search,
   Tag,
   Map as MapIcon
@@ -39,6 +37,7 @@ import { AttractionCard } from '../components/destination/AttractionCard';
 import { formatCurrency, formatCompactNumber } from '../utils/formatCurrency';
 import { useToast } from '../context/ToastContext';
 import { pageVariants } from '../animations/motionVariants';
+import { DetailsLoadingAnimation, DetailsTabSkeleton } from '../components/common/DetailsLoadingAnimation';
 
 const DETAIL_TABS = [
   { id: 'overview', label: 'Overview & Highlights', icon: Info },
@@ -133,9 +132,39 @@ export function DestinationDetails() {
     return list;
   }, [destination, selectedPlaceType, placeSearchQuery]);
 
+  const [loadedDestId, setLoadedDestId] = useState(null);
+  const [isTabTransitioning, setIsTabTransitioning] = useState(false);
+
+  const isLoading = loadedDestId !== destinationId;
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    const timer = setTimeout(() => {
+      setLoadedDestId(destinationId);
+    }, 600);
+    return () => clearTimeout(timer);
   }, [destinationId]);
+
+  const handleTabChange = (tabId) => {
+    if (tabId === activeTab) return;
+    setIsTabTransitioning(true);
+    setActiveTab(tabId);
+    setTimeout(() => {
+      setIsTabTransitioning(false);
+    }, 220);
+  };
+
+  if (isLoading) {
+    return (
+      <DetailsLoadingAnimation
+        destinationName={destination?.name || 'Destination Details'}
+        state={destination?.state}
+        country={destination?.country}
+        heroImage={destination?.heroImage}
+        type="destination"
+      />
+    );
+  }
 
   if (!destination) {
     return (
@@ -314,7 +343,7 @@ export function DestinationDetails() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`dest-tab-btn ${isActive ? 'active' : ''}`}
                 >
                   <IconComp size={16} />
@@ -331,8 +360,12 @@ export function DestinationDetails() {
 
       {/* Main Tabbed Content */}
       <main className="container section-padding dest-content-main">
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === 'overview' && (
+        {isTabTransitioning ? (
+          <DetailsTabSkeleton type={activeTab} count={3} />
+        ) : (
+          <>
+            {/* TAB 1: OVERVIEW */}
+            {activeTab === 'overview' && (
           <div className="dest-overview-layout">
             <div className="dest-overview-left">
               <div className="card mb-6 p-6">
@@ -366,7 +399,7 @@ export function DestinationDetails() {
                       <Building size={18} className="text-accent" /> Featured Stays in {destination.name}
                     </h3>
                     <button
-                      onClick={() => setActiveTab('hotels')}
+                      onClick={() => handleTabChange('hotels')}
                       className="text-xs font-semibold text-accent hover:underline"
                     >
                       View All ({destinationHotels.length}) →
@@ -702,7 +735,7 @@ export function DestinationDetails() {
                     onAddToTrip={handleAddAttractionToTrip}
                     onBookHotel={handleBookHotel}
                     onReserveRestaurant={handleReserveRestaurant}
-                    onViewOnMap={() => setActiveTab('map')}
+                    onViewOnMap={() => handleTabChange('map')}
                   />
                 ))}
               </div>
@@ -812,6 +845,8 @@ export function DestinationDetails() {
               height="520px"
             />
           </div>
+        )}
+          </>
         )}
       </main>
 

@@ -1,4 +1,4 @@
-import { HOTELS, HOTEL_AMENITY_FILTERS } from '../data/hotels';
+import { HOTELS, HOTEL_AMENITY_FILTERS } from '../data/hotels.js';
 
 export const hotelService = {
   getAllHotels: () => {
