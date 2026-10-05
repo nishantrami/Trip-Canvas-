@@ -4382,17 +4382,58 @@ ol {
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   overflow: hidden;
+  background: var(--color-surface);
 }
 
 .review-media-header {
   position: relative;
-  height: 180px;
+  height: 220px;
+  background: #17201c;
+  overflow: hidden;
 }
 
 .review-cover-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.review-cover-toggle-pills {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 4px;
+  background: rgba(23, 32, 28, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  z-index: 10;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.review-cover-pill {
+  padding: 0.28rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.review-cover-pill:hover {
+  color: #FFFFFF;
+}
+
+.review-cover-pill.active {
+  background: #FFFFFF;
+  color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .review-media-overlay {
@@ -4419,6 +4460,229 @@ ol {
 @media (max-width: 600px) {
   .review-stats-row {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Review Hotel Showcase Card in Step 7 */
+.review-hotel-showcase-card {
+  display: flex;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  margin-top: 0.75rem;
+}
+
+.review-hotel-showcase-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.review-hotel-media {
+  position: relative;
+  width: 290px;
+  min-height: 220px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--color-background-alt);
+}
+
+.review-hotel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.review-hotel-showcase-card:hover .review-hotel-img {
+  transform: scale(1.04);
+}
+
+.review-hotel-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.6) 100%);
+  pointer-events: none;
+}
+
+.review-hotel-badges-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.review-badge-pill {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.review-hotel-room-tag {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  background: rgba(23, 32, 28, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-hotel-content {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.review-hotel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.review-hotel-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.3;
+  margin-top: 0.2rem;
+}
+
+.review-hotel-price-badge-block {
+  text-align: right;
+  background: var(--color-accent-subtle);
+  border: 1px solid rgba(232, 121, 79, 0.2);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.review-hotel-amenities-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+}
+
+.review-amenity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--color-background-alt);
+  color: var(--color-text-secondary);
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.review-hotel-policy-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.policy-dot {
+  color: var(--color-border);
+  font-size: 0.75rem;
+}
+
+.review-hotel-footer-calc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-border-subtle);
+  margin-top: auto;
+}
+
+.review-total-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.review-hotel-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-hotel-empty-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--color-surface-alt);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-top: 0.75rem;
+}
+
+.review-empty-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-background-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .review-hotel-showcase-card {
+    flex-direction: column;
+  }
+
+  .review-hotel-media {
+    width: 100%;
+    height: 200px;
+    min-height: auto;
+  }
+
+  .review-hotel-content {
+    padding: 1rem;
+  }
+
+  .review-hotel-header-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .review-hotel-price-badge-block {
+    text-align: left;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 

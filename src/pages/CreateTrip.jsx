@@ -1,25 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import {
-  Compass,
   Calendar,
-  Users,
-  Heart,
   IndianRupee,
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
   Sparkles,
   MapPin,
-  Tag,
   Search,
   Check,
   Building,
   Star,
-  SlidersHorizontal,
-  Bed
+  Bed,
+  ShieldCheck
 } from 'lucide-react';
 import { destinationService } from '../services/destinationService';
 import { hotelService } from '../services/hotelService';
@@ -55,19 +51,25 @@ export function CreateTrip() {
   const prefillDestId = location.state?.prefillDestinationId || '';
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    destinationId: prefillDestId || 'udaipur',
-    title: '',
-    startDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0], // 7 days from now
-    endDate: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0], // 10 days from now
-    travelers: 2,
-    travelStyle: 'Couple',
-    selectedHotelId: '',
-    selectedHotel: null,
-    selectedRoom: null,
-    interests: ['Culture', 'Food & Dining', 'History & Forts'],
-    budget: 18000,
-    notes: ''
+  const [selectedCoverType, setSelectedCoverType] = useState('hotel'); // 'hotel' or 'destination'
+  const [formData, setFormData] = useState(() => {
+    const initialDestId = prefillDestId || 'udaipur';
+    const initialHotels = hotelService.getHotelsByDestination(initialDestId);
+    const topHotel = initialHotels.find(h => h.id === 'zostel-lake-pichola-udaipur') || initialHotels[0] || null;
+    return {
+      destinationId: initialDestId,
+      title: '',
+      startDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0], // 7 days from now
+      endDate: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0], // 10 days from now
+      travelers: 2,
+      travelStyle: 'Couple',
+      selectedHotelId: topHotel ? topHotel.id : '',
+      selectedHotel: topHotel,
+      selectedRoom: topHotel?.roomTypes?.[0] || null,
+      interests: ['Culture', 'Food & Dining', 'History & Forts'],
+      budget: 18000,
+      notes: ''
+    };
   });
 
   const [destSearchQuery, setDestSearchQuery] = useState('');
@@ -162,6 +164,18 @@ export function CreateTrip() {
     });
   };
 
+  const handleSelectDestination = (destId) => {
+    const hotels = hotelService.getHotelsByDestination(destId);
+    const topHotel = hotels.find(h => h.id.includes('zostel')) || hotels[0] || null;
+    setFormData((prev) => ({
+      ...prev,
+      destinationId: destId,
+      selectedHotelId: topHotel ? topHotel.id : '',
+      selectedHotel: topHotel,
+      selectedRoom: topHotel?.roomTypes?.[0] || null
+    }));
+  };
+
   const handleNext = () => {
     setError('');
     if (currentStep === 1 && !formData.destinationId) {
@@ -187,10 +201,15 @@ export function CreateTrip() {
   };
 
   const handleFinalSubmit = () => {
+    const reviewCover = (selectedCoverType === 'hotel' && formData.selectedHotel?.heroImage)
+      ? formData.selectedHotel.heroImage
+      : selectedDest?.heroImage;
+
     const created = createTrip({
       title: formData.title || `${selectedDest?.name} Journey`,
       destinationId: formData.destinationId,
       destinationName: selectedDest?.name,
+      coverImage: reviewCover,
       startDate: formData.startDate,
       endDate: formData.endDate,
       travelers: formData.travelers,
@@ -285,7 +304,7 @@ export function CreateTrip() {
                   return (
                     <div
                       key={dest.id}
-                      onClick={() => setFormData({ ...formData, destinationId: dest.id })}
+                      onClick={() => handleSelectDestination(dest.id)}
                       className={`wizard-dest-card ${isSelected ? 'selected' : ''}`}
                       role="button"
                       tabIndex={0}
@@ -637,13 +656,45 @@ export function CreateTrip() {
             <div className="wizard-step-content">
               <div className="trip-review-summary-card mb-6">
                 <div className="review-media-header">
-                  <img src={selectedDest?.heroImage} alt={selectedDest?.name} className="review-cover-img" />
+                  <img
+                    src={selectedCoverType === 'hotel' && formData.selectedHotel?.heroImage ? formData.selectedHotel.heroImage : (selectedDest?.heroImage || formData.selectedHotel?.heroImage)}
+                    alt={formData.title || selectedDest?.name}
+                    className="review-cover-img"
+                  />
                   <div className="review-media-overlay" />
                   <div className="review-header-info">
-                    <span className="badge badge-accent mb-1">{selectedDest?.category}</span>
-                    <h3 className="text-2xl font-bold text-white">{selectedDest?.name}</h3>
-                    <p className="text-white-muted text-sm">{selectedDest?.country}</p>
+                    <span className="badge badge-accent mb-1">
+                      {selectedCoverType === 'hotel' && formData.selectedHotel ? (formData.selectedHotel.badge || formData.selectedHotel.type) : selectedDest?.category}
+                    </span>
+                    <h3 className="text-2xl font-bold text-white">
+                      {selectedCoverType === 'hotel' && formData.selectedHotel ? formData.selectedHotel.name : selectedDest?.name}
+                    </h3>
+                    <p className="text-white-muted text-sm">
+                      {selectedCoverType === 'hotel' && formData.selectedHotel
+                        ? `${formData.selectedHotel.nearLocation}, ${selectedDest?.name}`
+                        : `${selectedDest?.name}, ${selectedDest?.country}`}
+                    </p>
                   </div>
+
+                  {/* Cover Photo Toggle */}
+                  {formData.selectedHotel && (
+                    <div className="review-cover-toggle-pills">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCoverType('destination')}
+                        className={`review-cover-pill ${selectedCoverType === 'destination' ? 'active' : ''}`}
+                      >
+                        Destination View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCoverType('hotel')}
+                        className={`review-cover-pill ${selectedCoverType === 'hotel' ? 'active' : ''}`}
+                      >
+                        Stay View
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="review-details-grid p-6">
@@ -673,44 +724,151 @@ export function CreateTrip() {
                     </div>
                   </div>
 
-                  {/* Selected Hotel Preview in Review */}
-                  <div className="mt-4 pt-4 border-t">
-                    <span className="text-xs text-muted uppercase tracking-wider block mb-2">Reserved Accommodation</span>
-                    {formData.selectedHotel ? (
-                      <div className="flex items-center gap-3 p-3 bg-surface-alt rounded-lg border">
-                        <img
-                          src={formData.selectedHotel.heroImage}
-                          alt={formData.selectedHotel.name}
-                          className="w-14 h-14 rounded-md object-cover flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1 mb-0.5">
-                            <span className="badge badge-accent text-3xs py-0 px-1">{formData.selectedHotel.type}</span>
-                            <span className="text-2xs text-rating flex items-center font-bold"><Star size={10} fill="currentColor" /> {formData.selectedHotel.rating}</span>
-                          </div>
-                          <h5 className="font-bold text-sm truncate">{formData.selectedHotel.name}</h5>
-                          <p className="text-2xs text-muted truncate">{formData.selectedHotel.nearLocation}</p>
-                          <span className="text-2xs font-semibold text-accent">
-                            {formatCurrency(formData.selectedHotel.pricePerNight)}/night • Total for {durationDays} nights: {formatCurrency(formData.selectedHotel.pricePerNight * durationDays)}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setCurrentStep(4)}
-                          className="btn btn-ghost btn-xs text-accent"
-                        >
-                          Change
-                        </button>
+                  {/* Selected Hotel Showcase Card in Step 7 */}
+                  <div className="review-section-block mt-6 pt-5 border-t">
+                    <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                      <div>
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                          <Building size={14} className="text-accent" /> Reserved Accommodation (Step 4)
+                        </span>
+                        <p className="text-xs text-muted">
+                          Your selected stay and room type for {durationDays} nights in {selectedDest?.name}
+                        </p>
                       </div>
-                    ) : (
-                      <div className="flex justify-between items-center p-3 bg-surface-alt rounded-lg border text-xs text-muted">
-                        <span>No hotel selected yet for this trip.</span>
+                      {formData.selectedHotel && (
                         <button
                           type="button"
                           onClick={() => setCurrentStep(4)}
                           className="btn btn-outline btn-xs"
                         >
-                          + Add Hotel
+                          Change Stay
+                        </button>
+                      )}
+                    </div>
+
+                    {formData.selectedHotel ? (
+                      <div className="review-hotel-showcase-card">
+                        <div className="review-hotel-media">
+                          <img
+                            src={formData.selectedHotel.heroImage}
+                            alt={formData.selectedHotel.name}
+                            className="review-hotel-img"
+                          />
+                          <div className="review-hotel-gradient" />
+
+                          {/* Overlay Badges */}
+                          <div className="review-hotel-badges-top">
+                            <span className="badge badge-accent review-badge-pill">
+                              <Sparkles size={11} /> {formData.selectedHotel.badge || 'Top Rated Stay'}
+                            </span>
+                            <span className="badge badge-rating review-badge-pill">
+                              <Star size={11} fill="currentColor" /> {formData.selectedHotel.rating}
+                            </span>
+                          </div>
+
+                          {formData.selectedRoom && (
+                            <div className="review-hotel-room-tag">
+                              <Bed size={12} />
+                              <span>{formData.selectedRoom.name}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="review-hotel-content">
+                          <div className="review-hotel-header-row">
+                            <div className="flex-1 min-w-0 pr-2">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="badge badge-primary text-3xs py-0.5 px-2 font-semibold">
+                                  {formData.selectedHotel.type || 'Boutique'}
+                                </span>
+                                {formData.selectedHotel.category && (
+                                  <span className="text-2xs text-muted">
+                                    {formData.selectedHotel.category}
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="review-hotel-title">{formData.selectedHotel.name}</h4>
+                              <p className="review-hotel-location flex items-center gap-1 text-xs text-muted mt-0.5">
+                                <MapPin size={12} className="text-accent flex-shrink-0" />
+                                <span className="truncate">{formData.selectedHotel.nearLocation || formData.selectedHotel.address}</span>
+                              </p>
+                            </div>
+
+                            <div className="review-hotel-price-badge-block">
+                              <span className="text-2xs text-muted block">Price per night</span>
+                              <div className="text-lg font-bold text-accent">
+                                {formatCurrency(formData.selectedHotel.pricePerNight)}
+                              </div>
+                              <span className="text-3xs text-muted block">excl. taxes</span>
+                            </div>
+                          </div>
+
+                          {/* Amenities Chips */}
+                          <div className="review-hotel-amenities-row">
+                            {(formData.selectedHotel.amenities || []).slice(0, 4).map((amenity, idx) => (
+                              <span key={idx} className="review-amenity-chip">
+                                <Check size={11} className="text-accent" /> {amenity}
+                              </span>
+                            ))}
+                          </div>
+
+                          {/* Policy / Trust Bar */}
+                          <div className="review-hotel-policy-row">
+                            <div className="flex items-center gap-1 text-2xs text-success font-medium">
+                              <ShieldCheck size={13} />
+                              <span>{formData.selectedHotel.policies?.cancellation || 'Free cancellation up to 24 hrs'}</span>
+                            </div>
+                            <span className="policy-dot">•</span>
+                            <div className="text-2xs text-muted">
+                              Check-in: <strong>{formData.selectedHotel.policies?.checkIn || '12:00 PM'}</strong>
+                            </div>
+                          </div>
+
+                          {/* Pricing Calculation Footer */}
+                          <div className="review-hotel-footer-calc">
+                            <div className="review-calc-col">
+                              <span className="text-2xs text-muted">Total Accommodation for {durationDays} Nights:</span>
+                              <div className="review-total-price">
+                                {formatCurrency((formData.selectedRoom?.price || formData.selectedHotel.pricePerNight) * durationDays)}
+                              </div>
+                            </div>
+
+                            <div className="review-hotel-actions">
+                              <button
+                                type="button"
+                                onClick={() => setCurrentStep(4)}
+                                className="btn btn-outline btn-xs"
+                              >
+                                Change Stay
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSelectHotel(formData.selectedHotel)}
+                                className="btn btn-ghost btn-xs text-muted hover:text-danger"
+                                title="Remove stay"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="review-hotel-empty-card">
+                        <div className="review-empty-icon-wrap">
+                          <Building size={24} className="text-muted" />
+                        </div>
+                        <div className="flex-1">
+                          <h5 className="font-bold text-sm text-primary">No hotel selected for this trip</h5>
+                          <p className="text-xs text-muted">You can add a luxury palace or boutique stay in {selectedDest?.name} anytime.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(4)}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <Building size={14} />
+                          <span>Select Hotel in {selectedDest?.name}</span>
                         </button>
                       </div>
                     )}

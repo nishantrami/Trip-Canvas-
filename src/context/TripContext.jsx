@@ -105,7 +105,7 @@ export function TripProvider({ children }) {
         destinationName: dest?.name || tripPayload.destinationName || "Custom Destination",
         destinationCountry: dest?.country || "World",
         destinationState: dest?.state || "",
-        coverImage: dest?.heroImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1200&auto=format&fit=crop",
+        coverImage: tripPayload.coverImage || dest?.heroImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1200&auto=format&fit=crop",
         startDate: tripPayload.startDate,
         endDate: tripPayload.endDate,
         daysCount: daysCount,
