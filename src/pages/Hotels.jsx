@@ -25,25 +25,41 @@ import { formatCurrency } from '../utils/formatCurrency';
 const DESTINATION_OPTIONS = [
   { id: 'all', label: 'All Destinations' },
   { id: 'udaipur', label: 'Udaipur, Rajasthan', badge: 'Floating Palaces' },
-  { id: 'goa', label: 'Goa', badge: 'Beach Resorts' },
-  { id: 'jaipur', label: 'Jaipur, Rajasthan', badge: 'Royal Heritage' },
-  { id: 'manali', label: 'Manali, Himachal', badge: 'Mountain Lodges' }
+  { id: 'goa', label: 'Goa', badge: 'Beach & Coastal Resorts' },
+  { id: 'jaipur', label: 'Jaipur, Rajasthan', badge: 'Royal Havelis & Palaces' },
+  { id: 'manali', label: 'Manali, Himachal', badge: 'Himalayan Mountain Chalets' },
+  { id: 'kashmir', label: 'Kashmir (Srinagar & Gulmarg)', badge: 'Dal Lake Houseboats & Ski' },
+  { id: 'kerala', label: 'Kerala (Alleppey & Munnar)', badge: 'Backwaters & Tea Hills' },
+  { id: 'mumbai', label: 'Mumbai, Maharashtra', badge: 'Marine Drive & Seafront' },
+  { id: 'delhi', label: 'Delhi NCR', badge: 'Lutyens Heritage & Mughal' },
+  { id: 'ahmedabad', label: 'Ahmedabad, Gujarat', badge: 'Heritage Pol Havelis' },
+  { id: 'kutch', label: 'Rann of Kutch, Gujarat', badge: 'White Desert Swiss Tents' },
+  { id: 'gir', label: 'Gir National Park, Gujarat', badge: 'Lion Safari Eco-Lodges' },
+  { id: 'saputara', label: 'Saputara, Gujarat', badge: 'Misty Hill Station' },
+  { id: 'dubai', label: 'Dubai, UAE', badge: 'Skyline & Palm Oceanfront' },
+  { id: 'bali', label: 'Bali, Indonesia', badge: 'Jungle & Beachfront Villas' },
+  { id: 'paris', label: 'Paris, France', badge: 'Eiffel View Balconies' },
+  { id: 'singapore', label: 'Singapore', badge: 'Marina Skyline & Sky Pools' },
+  { id: 'london', label: 'London, UK', badge: 'Thames & Classic Townhouses' },
+  { id: 'tokyo', label: 'Tokyo, Japan', badge: 'Modern Ryokan & High-Rise' }
 ];
 
 const PROPERTY_TYPES = [
   { id: 'all', label: 'All Types' },
-  { id: 'Haveli', label: 'Heritage Havelis' },
-  { id: 'Palace', label: 'Palace Stays' },
+  { id: 'Haveli', label: 'Heritage & Havelis' },
+  { id: 'Palace', label: 'Royal Palaces' },
   { id: 'Resort', label: 'Luxury Resorts' },
-  { id: 'Boutique', label: 'Boutique & Lakeside' }
+  { id: 'Boutique', label: 'Boutique Stays' },
+  { id: 'Houseboat', label: 'Houseboats' },
+  { id: 'Chalet', label: 'Mountain Chalets' }
 ];
 
 const BUDGET_TIERS = [
-  { id: 'all', label: 'All Budgets (₹2K – ₹40K+)', min: 0, max: 200000 },
-  { id: 'budget', label: '₹2,000 – ₹5,000 (Budget)', min: 2000, max: 5000 },
-  { id: 'mid', label: '₹5,000 – ₹12,000 (Heritage)', min: 5000, max: 12000 },
-  { id: 'luxury', label: '₹12,000 – ₹20,000 (Luxury)', min: 12000, max: 20000 },
-  { id: 'ultra', label: '₹20,000+ (Grand Palaces)', min: 20000, max: 200000 }
+  { id: 'all', label: 'All Budgets (₹2K – ₹30K)', min: 0, max: 200000 },
+  { id: 'budget', label: '₹2,000 – ₹5,000 (Budget & Eco)', min: 2000, max: 5000 },
+  { id: 'mid', label: '₹5,000 – ₹12,000 (Heritage & Comfort)', min: 5000, max: 12000 },
+  { id: 'luxury', label: '₹12,000 – ₹20,000 (Premium Luxury)', min: 12000, max: 20000 },
+  { id: 'ultra', label: '₹20,000 – ₹30,000 (Grand Palaces & 5-Star)', min: 20000, max: 30000 }
 ];
 
 const RATING_FILTERS = [
@@ -137,13 +153,13 @@ export function Hotels() {
         <div className="container hotels-hero-content">
           <div className="max-w-3xl">
             <span className="badge badge-accent mb-3">
-              <Sparkles size={13} /> Royal Rajputana & World-Class Palaces
+              <Sparkles size={13} /> Handcrafted Stays Across Top Destinations
             </span>
             <h1 className="heading-display text-white mb-3">
-              Luxury Hotels & Heritage Stays
+              Curated Hotels, Resorts & Stays
             </h1>
             <p className="text-white-muted text-lg mb-6 leading-relaxed">
-              From the 18th-century floating marble sanctuary of <strong>Taj Lake Palace</strong> to hilltop fortresses overlooking the Aravallis, discover hand-picked luxury suites and lakeside havelis.
+              From floating palaces in Udaipur and beachfront villas in Goa to Himalayan pine chalets in Manali and Dal Lake houseboats in Kashmir, discover verified stays from <strong>₹2,000 to ₹30,000</strong>.
             </p>
 
             {/* Quick Destination Filter Pills */}
@@ -180,16 +196,16 @@ export function Hotels() {
             <div className="value-strip-item">
               <Waves size={18} className="text-accent" />
               <div>
-                <strong>Lake & Palace Views</strong>
-                <span>Direct Pichola water access</span>
+                <strong>Prime Scenic Locations</strong>
+                <span>Waterfront, heritage & hill views</span>
               </div>
             </div>
             <div className="value-strip-divider" />
             <div className="value-strip-item">
               <IndianRupee size={18} className="text-accent" />
               <div>
-                <strong>No Prepayment Required</strong>
-                <span>Pay comfortably during check-in</span>
+                <strong>Curated Price Range</strong>
+                <span>Best rates between ₹2,000 – ₹30,000</span>
               </div>
             </div>
           </div>
@@ -206,7 +222,7 @@ export function Hotels() {
               <Search size={18} className="search-input-icon" />
               <input
                 type="text"
-                placeholder="Search hotel name, landmark (e.g. Lake Pichola, City Palace, Sisarma)..."
+                placeholder="Search hotel name, city, landmark (e.g. Baga, Dal Lake, Solang, Marine Drive)..."
                 className="form-input search-input-with-icon"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -237,7 +253,7 @@ export function Hotels() {
               >
                 <option value="recommended">Sort: Recommended</option>
                 <option value="price-low">Price: Low to High (From ₹2,000)</option>
-                <option value="price-high">Price: High to Low (From ₹42,000)</option>
+                <option value="price-high">Price: High to Low (Up to ₹30,000)</option>
                 <option value="rating-high">Highest Rated (★ 4.9+)</option>
                 <option value="popularity">Most Popular Stays</option>
               </select>

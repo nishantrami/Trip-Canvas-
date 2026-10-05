@@ -82,7 +82,8 @@ export const hotelService = {
     }
 
     if (type && type !== 'all') {
-      results = results.filter(h => h.type.toLowerCase() === type.toLowerCase());
+      const typeClean = type.toLowerCase();
+      results = results.filter(h => h.type && h.type.toLowerCase().includes(typeClean));
     }
 
     if (amenities && amenities.length > 0) {
