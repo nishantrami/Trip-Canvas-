@@ -10,7 +10,7 @@ export default defineConfig({
     strictPort: false
   },
   build: {
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -25,6 +25,9 @@ export default defineConfig({
               return 'vendor-react';
             }
             return 'vendor';
+          }
+          if (id.includes('/src/data/') || id.includes('\\src\\data\\')) {
+            return 'travel-data';
           }
         }
       }
