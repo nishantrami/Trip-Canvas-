@@ -17,9 +17,11 @@ import { Profile } from '../pages/Profile';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 import { NotFound } from '../pages/NotFound';
+import { AdminDashboard } from '../pages/Admin/AdminDashboard';
 
 // Guard
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
+import { AdminProtectedRoute } from '../components/admin/AdminProtectedRoute';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -77,6 +79,16 @@ export function AppRoutes() {
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Control Center - Secret Route */}
+          <Route
+            path="/admin"
+            element={
+              <AdminProtectedRoute>
+                <AdminDashboard />
+              </AdminProtectedRoute>
             }
           />
 

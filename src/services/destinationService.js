@@ -4,13 +4,41 @@ import { RESTAURANTS } from '../data/restaurants';
 
 export const destinationService = {
   getAllDestinations: () => {
-    return DESTINATIONS;
+    try {
+      const custom = JSON.parse(localStorage.getItem('tripcanvas_custom_destinations') || '[]');
+      const deletedIds = new Set(JSON.parse(localStorage.getItem('tripcanvas_deleted_dest_ids') || '[]'));
+      const defaults = DESTINATIONS.filter(d => !deletedIds.has(d.id));
+
+      const customMap = new Map();
+      if (Array.isArray(custom)) {
+        custom.forEach(cd => customMap.set(cd.id, cd));
+      }
+
+      const merged = defaults.map(d => {
+        if (customMap.has(d.id)) {
+          const c = customMap.get(d.id);
+          customMap.delete(d.id);
+          return c;
+        }
+        return d;
+      });
+
+      customMap.forEach(cd => {
+        if (!deletedIds.has(cd.id)) {
+          merged.push(cd);
+        }
+      });
+      return merged;
+    } catch {
+      return DESTINATIONS;
+    }
   },
 
   getDestinationById: (id) => {
     if (!id) return null;
     const cleanId = id.toLowerCase().trim();
-    return DESTINATIONS.find(d => d.id.toLowerCase() === cleanId || d.name.toLowerCase() === cleanId) || null;
+    const all = destinationService.getAllDestinations();
+    return all.find(d => d.id.toLowerCase() === cleanId || d.name.toLowerCase() === cleanId) || null;
   },
 
   getCategories: () => {
@@ -80,10 +108,11 @@ export const destinationService = {
   },
 
   searchDestinations: (query = '') => {
-    if (!query || !query.trim()) return DESTINATIONS;
+    const all = destinationService.getAllDestinations();
+    if (!query || !query.trim()) return all;
     const q = query.toLowerCase().trim();
 
-    return DESTINATIONS.filter(dest => {
+    return all.filter(dest => {
       const matchName = dest.name.toLowerCase().includes(q);
       const matchState = dest.state.toLowerCase().includes(q);
       const matchCountry = dest.country.toLowerCase().includes(q);
@@ -144,13 +173,13 @@ export const destinationService = {
   },
 
   getPopularDestinations: (limit = 6) => {
-    return [...DESTINATIONS]
+    return [...destinationService.getAllDestinations()]
       .sort((a, b) => b.reviewsCount - a.reviewsCount)
       .slice(0, limit);
   },
 
   getTrendingDestinations: (limit = 4) => {
-    return [...DESTINATIONS]
+    return [...destinationService.getAllDestinations()]
       .sort((a, b) => b.rating - a.rating)
       .slice(0, limit);
   }
