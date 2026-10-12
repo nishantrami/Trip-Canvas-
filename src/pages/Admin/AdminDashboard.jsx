@@ -484,7 +484,7 @@ export function AdminDashboard() {
             {/* Export JSON */}
             <button
               onClick={exportSystemBackup}
-              className="btn btn-outline btn-sm admin-header-action-btn"
+              className="btn btn-sm admin-header-action-btn admin-export-btn"
               title="Download Full Database Dump"
             >
               <Download size={14} />
@@ -893,11 +893,11 @@ export function AdminDashboard() {
 
                   <button
                     onClick={handleExportBookingsCSV}
-                    className="btn btn-outline btn-sm flex items-center gap-2"
-                    title="Download CSV"
+                    className="btn btn-sm admin-export-btn flex items-center gap-2"
+                    title="Download Bookings as CSV"
                   >
                     <FileSpreadsheet size={15} />
-                    <span className="desktop-only">Export CSV</span>
+                    <span>Export CSV</span>
                   </button>
                 </div>
               </div>
@@ -1296,8 +1296,12 @@ export function AdminDashboard() {
                       </select>
                     </div>
 
-                    <div className="admin-checkbox-group mt-3">
-                      <label className="admin-checkbox-label">
+                    <div className="admin-toggle-setting-row mt-4">
+                      <div className="admin-toggle-text-block">
+                        <div className="admin-toggle-label">Real-time Bookings Engine</div>
+                        <div className="admin-toggle-subtext">Enable public booking of luxury stays and table reservations</div>
+                      </div>
+                      <label className="admin-switch" title="Toggle Real-time Bookings Engine">
                         <input
                           type="checkbox"
                           checked={platformConfig.bookingsEnabled !== false}
@@ -1305,12 +1309,16 @@ export function AdminDashboard() {
                             setPlatformConfig((prev) => ({ ...prev, bookingsEnabled: e.target.checked }))
                           }
                         />
-                        <span>Enable Real-time Hotel & Table Bookings Engine</span>
+                        <span className="admin-switch-slider" />
                       </label>
                     </div>
 
-                    <div className="admin-checkbox-group">
-                      <label className="admin-checkbox-label">
+                    <div className="admin-toggle-setting-row">
+                      <div className="admin-toggle-text-block">
+                        <div className="admin-toggle-label">Maintenance Mode</div>
+                        <div className="admin-toggle-subtext">Displays emergency maintenance advisory banner across public site</div>
+                      </div>
+                      <label className="admin-switch danger" title="Toggle Maintenance Mode">
                         <input
                           type="checkbox"
                           checked={platformConfig.maintenanceMode === true}
@@ -1318,7 +1326,7 @@ export function AdminDashboard() {
                             setPlatformConfig((prev) => ({ ...prev, maintenanceMode: e.target.checked }))
                           }
                         />
-                        <span>Maintenance Mode (Public site displays maintenance banner)</span>
+                        <span className="admin-switch-slider" />
                       </label>
                     </div>
                   </div>
@@ -1356,7 +1364,7 @@ export function AdminDashboard() {
                       </div>
                       <button
                         onClick={exportSystemBackup}
-                        className="btn btn-outline btn-sm flex items-center gap-1.5"
+                        className="btn btn-sm admin-export-btn flex items-center gap-1.5"
                       >
                         <Download size={14} /> Export Backup
                       </button>

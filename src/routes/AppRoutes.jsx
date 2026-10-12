@@ -17,6 +17,7 @@ import { Profile } from '../pages/Profile';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 import { NotFound } from '../pages/NotFound';
+import { Contact } from '../pages/Contact';
 import { AdminDashboard } from '../pages/Admin/AdminDashboard';
 
 // Guard
@@ -47,6 +48,7 @@ export function AppRoutes() {
           <Route path="/explore/:destinationId" element={<DestinationDetails />} />
           <Route path="/hotels" element={<Hotels />} />
           <Route path="/restaurants" element={<Restaurants />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 

@@ -57,6 +57,7 @@ export function Footer() {
               <li><Link to="/my-bookings">My Bookings & Passes</Link></li>
               <li><Link to="/create-trip">Trip Planner Wizard</Link></li>
               <li><Link to="/my-trips">My Saved Trips</Link></li>
+              <li><Link to="/contact">24/7 Concierge & Contact</Link></li>
             </ul>
           </div>
 

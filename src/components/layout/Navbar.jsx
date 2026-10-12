@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Building,
   Utensils,
-  CheckCircle2
+  CheckCircle2,
+  Headphones
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
@@ -116,6 +117,12 @@ export function Navbar() {
             >
               My Trips
               {trips.length > 0 && <span className="nav-badge-count">{trips.length}</span>}
+            </NavLink>
+            <NavLink
+              to="/contact"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              Contact
             </NavLink>
           </nav>
 
@@ -359,6 +366,15 @@ export function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <User size={18} /> Profile & Settings
+                </NavLink>
+                <NavLink
+                  to="/contact"
+                  className={({ isActive }) =>
+                    `mobile-nav-item ${isActive ? 'active' : ''}`
+                  }
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Headphones size={18} /> Contact & Concierge
                 </NavLink>
               </div>
 
