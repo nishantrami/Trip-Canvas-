@@ -174,6 +174,14 @@ To preview the production bundle locally:
 npm run preview
 ```
 
+### 5. Deploy to Vercel (SPA Routing Fix)
+
+TripCanvas is fully configured for zero-configuration Vercel deployment. The included [`vercel.json`](vercel.json) routes all client-side paths back to `/index.html` to eliminate `404 Not Found` errors on page reloads:
+
+```bash
+vercel
+```
+
 ---
 
 ## 🧭 Application Pages
@@ -264,6 +272,7 @@ Trip-Canvas-/
 ├── .gitignore
 ├── index.html                  # HTML5 shell & font imports
 ├── package.json
+├── vercel.json                 # Vercel SPA client-side route rewrites
 └── vite.config.js              # Vite configuration
 ```
 
