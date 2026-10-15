@@ -406,5 +406,105 @@ export const UDAIPUR_HOTELS = [
     ],
     coordinates: { lat: 24.5804, lng: 73.6812 },
     policies: { checkIn: "12:00 PM", checkOut: "10:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
+  },
+  {
+    id: "pichola-heritage-homestay-udaipur",
+    name: "Lake Pichola Heritage Homestay",
+    destinationId: "udaipur",
+    destinationName: "Udaipur",
+    city: "Udaipur",
+    state: "Rajasthan",
+    country: "India",
+    category: "Budget Heritage Homestay",
+    type: "Haveli",
+    rating: 4.84,
+    reviewsCount: 1420,
+    badge: "Budget-Friendly Gem",
+    tagline: "Charming family-run lakefront haveli with rooftop terrace overlooking Lake Pichola",
+    address: "21, Gangaraur Ghat, Near Jagdish Chowk, Udaipur, Rajasthan 313001",
+    nearLocation: "Gangaur Ghat, Lake Pichola",
+    distanceToLandmarks: [
+      { landmark: "Gangaur Ghat", distance: "0.1 km" },
+      { landmark: "City Palace", distance: "0.3 km" },
+      { landmark: "Jagdish Temple", distance: "0.2 km" }
+    ],
+    pricePerNight: 1250,
+    originalPrice: 1800,
+    heroImage: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop"
+    ],
+    description: "Authentic Rajasthani homestay offering comfortable, clean AC rooms right next to Gangaur Ghat. Enjoy panoramic rooftop views of the City Palace without stretching your budget.",
+    amenities: [
+      "Rooftop Sunset Terrace",
+      "Free Wi-Fi",
+      "Air Conditioning",
+      "Hot Water 24/7",
+      "Luggage Storage",
+      "Travel Assistance"
+    ],
+    roomTypes: [
+      {
+        id: "pichola_deluxe_double",
+        name: "Standard Heritage Room",
+        price: 1250,
+        size: "220 sq.ft",
+        bed: "Double Bed",
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800&auto=format&fit=crop",
+        perks: ["Lake Pichola Walking Distance", "Free High-Speed Wi-Fi", "Daily Housekeeping"]
+      }
+    ],
+    coordinates: { lat: 24.5795, lng: 73.6821 },
+    policies: { checkIn: "12:00 PM", checkOut: "10:30 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
+  },
+  {
+    id: "moustache-hostel-udaipur",
+    name: "Moustache Udaipur Lakeview Stays",
+    destinationId: "udaipur",
+    destinationName: "Udaipur",
+    city: "Udaipur",
+    state: "Rajasthan",
+    country: "India",
+    category: "Backpacker Boutique",
+    type: "Boutique",
+    rating: 4.79,
+    reviewsCount: 1850,
+    badge: "Super Saver Stay",
+    tagline: "Vibrant backpacker oasis near Lal Ghat with rooftop cafe and cultural community vibes",
+    address: "Outside Chandpole, Near Hanuman Ghat, Udaipur, Rajasthan 313001",
+    nearLocation: "Hanuman Ghat, Lake Pichola",
+    distanceToLandmarks: [
+      { landmark: "Bagore Ki Haveli", distance: "0.4 km" },
+      { landmark: "City Palace", distance: "0.6 km" }
+    ],
+    pricePerNight: 1100,
+    originalPrice: 1600,
+    heroImage: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1200&auto=format&fit=crop"
+    ],
+    description: "Cozy budget private rooms and traveler community hub with stunning sunset vistas over Pichola.",
+    amenities: [
+      "Rooftop Cafe",
+      "Free High-Speed Wi-Fi",
+      "Air Conditioning",
+      "Board Games & Lounge"
+    ],
+    roomTypes: [
+      {
+        id: "moustache_private_room",
+        name: "Private Queen Room",
+        price: 1100,
+        size: "200 sq.ft",
+        bed: "Queen Bed",
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800&auto=format&fit=crop",
+        perks: ["Rooftop Cafe Access", "Free Wi-Fi"]
+      }
+    ],
+    coordinates: { lat: 24.5812, lng: 73.6798 },
+    policies: { checkIn: "01:00 PM", checkOut: "11:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
   }
 ];

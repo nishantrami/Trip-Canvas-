@@ -148,6 +148,47 @@ export const GUJARAT_HOTELS = [
     coordinates: { lat: 23.0210, lng: 72.5890 },
     policies: { checkIn: "12:00 PM", checkOut: "10:30 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
   },
+  {
+    id: "heritage-pol-homestay-ahmedabad",
+    name: "Heritage Pol Traditional Homestay",
+    destinationId: "ahmedabad",
+    destinationName: "Ahmedabad",
+    city: "Old City, Ahmedabad",
+    state: "Gujarat",
+    country: "India",
+    category: "Budget Pol Homestay",
+    type: "Haveli",
+    rating: 4.80,
+    reviewsCount: 1320,
+    badge: "Budget Heritage Gem",
+    tagline: "Authentic Pol homestay near Manek Chowk with warm Gujarati hospitality and courtyard",
+    address: "Khadia Gate, Near Manek Chowk, Ahmedabad, Gujarat 380001",
+    nearLocation: "Manek Chowk / Khadia",
+    distanceToLandmarks: [
+      { landmark: "Manek Chowk Night Market", distance: "0.3 km" },
+      { landmark: "Sabarmati Riverfront", distance: "2.1 km" }
+    ],
+    pricePerNight: 1200,
+    originalPrice: 1700,
+    heroImage: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1200&auto=format&fit=crop",
+    gallery: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1200&auto=format&fit=crop"],
+    description: "Serene traditional homestay situated in the historic pol alleys of Ahmedabad. Clean AC rooms, tranquil courtyard, and footsteps away from street food at Manek Chowk.",
+    amenities: ["Free High-Speed Wi-Fi", "Air Conditioning", "Courtyard Lounge", "Hot Water", "Tea / Coffee"],
+    roomTypes: [
+      {
+        id: "pol_budget_room",
+        name: "Standard AC Courtyard Room",
+        price: 1200,
+        size: "200 sq.ft",
+        bed: "Double Bed",
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800&auto=format&fit=crop",
+        perks: ["Courtyard Access", "Free Wi-Fi", "Air Conditioning"]
+      }
+    ],
+    coordinates: { lat: 23.0240, lng: 72.5850 },
+    policies: { checkIn: "12:00 PM", checkOut: "11:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
+  },
 
   // ================= KUTCH HOTELS =================
   {

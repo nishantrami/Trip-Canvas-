@@ -341,5 +341,47 @@ export const MANALI_HOTELS = [
     ],
     coordinates: { lat: 32.2570, lng: 77.1680 },
     policies: { checkIn: "12:00 PM", checkOut: "10:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
+  },
+  {
+    id: "old-manali-riverside-homestay",
+    name: "Old Manali Riverside Chalet Homestay",
+    destinationId: "manali",
+    destinationName: "Manali",
+    city: "Old Manali",
+    state: "Himachal Pradesh",
+    country: "India",
+    category: "Budget Mountain Homestay",
+    type: "Chalet",
+    rating: 4.83,
+    reviewsCount: 1480,
+    badge: "Budget Mountain Pick",
+    tagline: "Cozy pine-wood cottage amidst apple orchards near the gushing Manalsu river",
+    address: "Club House Road, Old Manali, Himachal Pradesh 175131",
+    nearLocation: "Club House Road, Old Manali",
+    distanceToLandmarks: [
+      { landmark: "Manalsu River", distance: "0.1 km" },
+      { landmark: "Hadimba Temple", distance: "0.8 km" },
+      { landmark: "Mall Road", distance: "1.8 km" }
+    ],
+    pricePerNight: 1200,
+    originalPrice: 1750,
+    heroImage: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop",
+    gallery: ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop"],
+    description: "Traditional Himachali wooden cottage with private pine-scented rooms, hot water geysers, mountain view balconies, and home-cooked Himachali meals.",
+    amenities: ["Free High-Speed Wi-Fi", "Mountain Balcony", "Hot Water Geyser", "Campfire Evenings", "Heater on Request"],
+    roomTypes: [
+      {
+        id: "manali_chalet_standard",
+        name: "Standard Pine View Room",
+        price: 1200,
+        size: "220 sq.ft",
+        bed: "Double Bed",
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800&auto=format&fit=crop",
+        perks: ["Valley View", "Free Wi-Fi", "Daily Tea"]
+      }
+    ],
+    coordinates: { lat: 32.2540, lng: 77.1710 },
+    policies: { checkIn: "12:00 PM", checkOut: "11:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
   }
 ];

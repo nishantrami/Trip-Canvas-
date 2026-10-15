@@ -396,5 +396,47 @@ export const GOA_HOTELS = [
     ],
     coordinates: { lat: 15.6320, lng: 73.7380 },
     policies: { checkIn: "12:00 PM", checkOut: "10:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
+  },
+  {
+    id: "goa-palms-beachside-homestay",
+    name: "Goa Palms Beachside Homestay",
+    destinationId: "goa",
+    destinationName: "Goa",
+    city: "Calangute, North Goa",
+    state: "Goa",
+    country: "India",
+    category: "Budget Beach Homestay",
+    type: "Boutique",
+    rating: 4.81,
+    reviewsCount: 1540,
+    badge: "Budget Beach Pick",
+    tagline: "Cozy tropical homestay surrounded by swaying palms, 3 minutes walk to Calangute beach",
+    address: "Holiday Street, Gauravaddo, Calangute, Goa 403516",
+    nearLocation: "Calangute Beach / Holiday St",
+    distanceToLandmarks: [
+      { landmark: "Calangute Beach", distance: "0.2 km" },
+      { landmark: "Baga Beach", distance: "1.8 km" },
+      { landmark: "Aguada Fort", distance: "6.5 km" }
+    ],
+    pricePerNight: 1200,
+    originalPrice: 1800,
+    heroImage: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1200&auto=format&fit=crop",
+    gallery: ["https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1200&auto=format&fit=crop"],
+    description: "Serene garden homestay with airy private AC rooms, lush balcony garden, and short walk to the vibrant Calangute beach promenade.",
+    amenities: ["Free High-Speed Wi-Fi", "Air Conditioning", "Balcony Seating", "Scooter Rental Help", "Hot Water"],
+    roomTypes: [
+      {
+        id: "goa_palms_standard",
+        name: "Standard AC Garden Room",
+        price: 1200,
+        size: "220 sq.ft",
+        bed: "Double Bed",
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+        perks: ["Garden View", "Free Wi-Fi", "Walk to Beach"]
+      }
+    ],
+    coordinates: { lat: 15.5390, lng: 73.7620 },
+    policies: { checkIn: "12:00 PM", checkOut: "11:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
   }
 ];

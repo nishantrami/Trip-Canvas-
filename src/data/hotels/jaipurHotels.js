@@ -341,5 +341,47 @@ export const JAIPUR_HOTELS = [
     ],
     coordinates: { lat: 26.9210, lng: 75.8210 },
     policies: { checkIn: "12:00 PM", checkOut: "10:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
+  },
+  {
+    id: "hawa-mahal-heritage-homestay-jaipur",
+    name: "Hawa Mahal Pink City Homestay",
+    destinationId: "jaipur",
+    destinationName: "Jaipur",
+    city: "Jaipur",
+    state: "Rajasthan",
+    country: "India",
+    category: "Budget Heritage Homestay",
+    type: "Haveli",
+    rating: 4.82,
+    reviewsCount: 1620,
+    badge: "Budget Pink City Pick",
+    tagline: "Authentic traditional haveli home stay just a 5-minute walk from Hawa Mahal",
+    address: "Badi Chaupar, Near Hawa Mahal, Jaipur, Rajasthan 302002",
+    nearLocation: "Badi Chaupar, Pink City",
+    distanceToLandmarks: [
+      { landmark: "Hawa Mahal", distance: "0.3 km" },
+      { landmark: "City Palace", distance: "0.5 km" },
+      { landmark: "Jantar Mantar", distance: "0.6 km" }
+    ],
+    pricePerNight: 1200,
+    originalPrice: 1750,
+    heroImage: "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1200&auto=format&fit=crop",
+    gallery: ["https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1200&auto=format&fit=crop"],
+    description: "Experience genuine Rajasthani hospitality in the heart of the walled Pink City with quiet AC rooms and rooftop views of the historic bazaars.",
+    amenities: ["Free High-Speed Wi-Fi", "Air Conditioning", "Rooftop Terrace", "Luggage Storage", "Travel Desk"],
+    roomTypes: [
+      {
+        id: "pink_city_standard",
+        name: "Standard Double Room",
+        price: 1200,
+        size: "210 sq.ft",
+        bed: "Double Bed",
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=800&auto=format&fit=crop",
+        perks: ["Walk to Hawa Mahal", "Free Wi-Fi", "Hot Water"]
+      }
+    ],
+    coordinates: { lat: 26.9240, lng: 75.8260 },
+    policies: { checkIn: "12:00 PM", checkOut: "11:00 AM", cancellation: "Free cancellation up to 24 hours", petsAllowed: false }
   }
 ];

@@ -49,6 +49,17 @@ export const calculateDaysBetween = (startDateStr, endDateStr) => {
   return Math.max(1, diffDays);
 };
 
+export const calculateNightsBetween = (startDateStr, endDateStr) => {
+  if (!startDateStr || !endDateStr) return 1;
+  const start = new Date(startDateStr);
+  const end = new Date(endDateStr);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 1;
+
+  const diffTime = Math.max(0, end - start);
+  const nights = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, nights);
+};
+
 export const truncateText = (text, maxLength = 120) => {
   if (!text || text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + '...';

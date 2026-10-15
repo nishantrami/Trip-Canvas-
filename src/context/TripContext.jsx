@@ -67,6 +67,10 @@ export function TripProvider({ children }) {
   const createTrip = useCallback(
     (tripPayload) => {
       const daysCount = calculateDaysBetween(tripPayload.startDate, tripPayload.endDate);
+      const nightsCount = (typeof tripPayload.nightsCount === 'number' && tripPayload.nightsCount > 0)
+        ? tripPayload.nightsCount
+        : Math.max(1, daysCount - 1);
+
       const dest = DESTINATIONS.find(
         (d) =>
           d.id.toLowerCase() === (tripPayload.destinationId || '').toLowerCase() ||
@@ -139,13 +143,14 @@ export function TripProvider({ children }) {
 
       if (tripPayload.hotel) {
         const hotelPerNight = tripPayload.hotelRoom?.price || tripPayload.hotel.pricePerNight || 0;
-        const hotelStayTotal = hotelPerNight * daysCount;
+        const hotelStayTotal = hotelPerNight * nightsCount;
         expenses.push({
           id: generateId('exp_hotel'),
-          title: `${tripPayload.hotel.name} (${daysCount} Nights Stay)`,
+          title: `${tripPayload.hotel.name} (${nightsCount} Nights Stay)`,
           category: 'hotel',
           amount: hotelStayTotal,
-          date: tripPayload.startDate
+          date: tripPayload.startDate,
+          isConfirmed: true
         });
 
         if (itinerary.length > 0) {
@@ -156,11 +161,48 @@ export function TripProvider({ children }) {
             category: "Stay",
             cost: 0,
             location: tripPayload.hotel.nearLocation || tripPayload.hotel.address || "Hotel",
-            notes: `${tripPayload.hotelRoom?.name || 'Reserved Room'}. Check-in from ${tripPayload.hotel.policies?.checkIn || '02:00 PM'}.`,
+            notes: `${tripPayload.hotelRoom?.name || 'Reserved Room'}. Check-in from ${tripPayload.hotel.policies?.checkIn || '02:00 PM'}. (${nightsCount} Nights)`,
             completed: false
           });
         }
       }
+
+      // If custom committed budget allocations were passed, log estimated committed allocations
+      if (tripPayload.allocatedExpenses && !tripPayload.isAccommodationOnly) {
+        const alloc = tripPayload.allocatedExpenses;
+        if (alloc.food > 0) {
+          expenses.push({
+            id: generateId('exp_food'),
+            title: `Estimated Food & Dining (${daysCount} Days)`,
+            category: 'food',
+            amount: alloc.food,
+            date: tripPayload.startDate,
+            isEstimated: true
+          });
+        }
+        if (alloc.transportation > 0) {
+          expenses.push({
+            id: generateId('exp_trans'),
+            title: `Estimated Local Transit & Transfers`,
+            category: 'travel',
+            amount: alloc.transportation,
+            date: tripPayload.startDate,
+            isEstimated: true
+          });
+        }
+        if (alloc.activities > 0) {
+          expenses.push({
+            id: generateId('exp_act'),
+            title: `Sightseeing & Experience Passes`,
+            category: 'activities',
+            amount: alloc.activities,
+            date: tripPayload.startDate,
+            isEstimated: true
+          });
+        }
+      }
+
+      const totalBudgetAmount = Number(tripPayload.budget) || (dest?.averageBudget ? dest.averageBudget * daysCount * (tripPayload.travelers || 1) : 15000);
 
       const newTrip = {
         id: generateId('trip'),
@@ -173,6 +215,7 @@ export function TripProvider({ children }) {
         startDate: tripPayload.startDate,
         endDate: tripPayload.endDate,
         daysCount: daysCount,
+        nightsCount: nightsCount,
         travelers: Number(tripPayload.travelers) || 1,
         travelStyle: tripPayload.travelStyle || "Solo",
         interests: tripPayload.interests || [],
@@ -180,8 +223,11 @@ export function TripProvider({ children }) {
         selectedRoom: tripPayload.hotelRoom || null,
         status: "upcoming",
         budget: {
-          total: Number(tripPayload.budget) || (dest?.averageBudget ? dest.averageBudget * daysCount * (tripPayload.travelers || 1) : 15000),
-          currency: "INR"
+          total: totalBudgetAmount,
+          hotelBudget: tripPayload.hotelBudget || (tripPayload.hotel ? (tripPayload.hotelRoom?.price || tripPayload.hotel.pricePerNight) * nightsCount : Math.round(totalBudgetAmount * 0.3)),
+          currency: "INR",
+          isAccommodationOnly: Boolean(tripPayload.isAccommodationOnly),
+          allocatedExpenses: tripPayload.allocatedExpenses || null
         },
         expenses: expenses,
         notes: tripPayload.notes || "",
