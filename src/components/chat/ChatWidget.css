@@ -1662,14 +1662,22 @@
    -------------------------------------------------------------------------- */
 @media (max-width: 640px) {
   .chat-widget-root {
-    bottom: 16px;
-    right: 16px;
+    bottom: calc(16px + var(--safe-bottom, 0px));
+    right: calc(16px + var(--safe-right, 0px));
   }
 
   .chat-window-container {
     width: calc(100vw - 32px);
-    height: calc(100vh - 90px);
+    height: calc(100dvh - 80px);
+    max-height: calc(100dvh - 80px);
     border-radius: 16px;
+  }
+
+  .chat-window-container.maximized {
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
   }
 
   .chat-launcher-btn {
@@ -1683,5 +1691,27 @@
 
   .settings-engine-options {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .chat-widget-root {
+    bottom: calc(10px + var(--safe-bottom, 0px));
+    right: calc(10px + var(--safe-right, 0px));
+  }
+
+  .chat-window-container {
+    width: calc(100vw - 20px);
+    height: calc(100dvh - 65px);
+    max-height: calc(100dvh - 65px);
+  }
+
+  .chat-launcher-btn {
+    height: 44px;
+    padding: 0 12px;
+  }
+
+  .launcher-content span {
+    font-size: 0.85rem;
   }
 }

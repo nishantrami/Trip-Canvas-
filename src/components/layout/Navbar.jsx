@@ -136,20 +136,20 @@ export function Navbar() {
               title="Search destinations (Ctrl+K)"
             >
               <Search size={17} />
-              <span className="desktop-only text-muted">Search places...</span>
-              <span className="search-shortcut desktop-only">⌘K</span>
+              <span className="nav-search-label text-muted">Search places...</span>
+              <span className="search-shortcut">⌘K</span>
             </button>
 
             {/* Create Trip CTA */}
             <Link to="/create-trip" className="btn btn-primary btn-sm create-trip-nav-btn">
               <Plus size={16} />
-              <span className="desktop-only">Plan Trip</span>
+              <span className="nav-btn-label">Plan Trip</span>
             </Link>
 
             {/* Wishlist Icon */}
             <Link
               to="/favorites"
-              className="navbar-icon-btn desktop-only"
+              className="navbar-icon-btn nav-wishlist-btn desktop-only"
               aria-label="View saved wishlist"
               title="Saved destinations"
             >
@@ -174,8 +174,8 @@ export function Navbar() {
                       {getInitials(user.name)}
                     </div>
                   )}
-                  <span className="nav-user-name desktop-only">{user.name.split(' ')[0]}</span>
-                  <ChevronDown size={14} className="desktop-only text-muted" />
+                  <span className="nav-user-name">{user.name.split(' ')[0]}</span>
+                  <ChevronDown size={14} className="nav-user-chevron text-muted" />
                 </button>
 
                 <AnimatePresence>

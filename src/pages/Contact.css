@@ -102,7 +102,7 @@
 
 .contact-channels-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 1.5rem;
 }
 
@@ -869,4 +869,16 @@
   display: flex;
   gap: 1rem;
   flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .cta-actions-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-actions-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
