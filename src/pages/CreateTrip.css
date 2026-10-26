@@ -597,8 +597,8 @@
 /* Hotel Recommendations Cards */
 .recommended-hotels-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 1.25rem;
 }
 
 .rec-hotel-card {
@@ -610,6 +610,8 @@
   flex-direction: column;
   transition: all var(--transition-base);
   position: relative;
+  min-width: 0;
+  box-shadow: var(--shadow-xs);
 }
 
 .rec-hotel-card:hover {
@@ -631,7 +633,7 @@
 
 .rec-hotel-media-wrap {
   position: relative;
-  height: 155px;
+  height: 165px;
   width: 100%;
   overflow: hidden;
   background: var(--color-background-alt);
@@ -655,6 +657,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-full);
 }
 
 .rec-hotel-rating {
@@ -662,8 +665,9 @@
   top: 8px;
   right: 8px;
   font-size: 0.72rem;
-  padding: 0.15rem 0.5rem;
+  padding: 0.2rem 0.55rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-full);
 }
 
 .rec-hotel-selected-badge {
@@ -674,26 +678,28 @@
   color: #FFFFFF;
   font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.2rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .rec-hotel-body {
-  padding: 1rem;
+  padding: 1.15rem;
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
 }
 
 .rec-hotel-type-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.35rem;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
 .rec-hotel-type-tag {
@@ -709,7 +715,13 @@
   font-weight: 700;
   color: var(--color-primary);
   margin: 0 0 0.35rem 0;
-  line-height: 1.3;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
 }
 
 .rec-hotel-loc-row {
@@ -719,29 +731,34 @@
   font-size: 0.75rem;
   color: var(--color-text-muted);
   margin-bottom: 0.5rem;
+  min-width: 0;
 }
 
 .rec-landmark-proximity-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 0.2rem 0.5rem;
-  font-size: 0.7rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--color-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rec-transit-cost-pill {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .rec-amenities-strip {
@@ -749,46 +766,93 @@
   flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 0.85rem;
+  min-height: 48px;
+  align-content: flex-start;
 }
 
 .rec-amenity-tag {
   font-size: 0.68rem;
-  padding: 0.15rem 0.45rem;
+  padding: 0.18rem 0.5rem;
   border-radius: var(--radius-full);
   background: var(--color-background-alt);
   color: var(--color-text-muted);
+  border: 1px solid var(--color-border-subtle);
+  white-space: nowrap;
 }
 
+/* Hotel Card Footer - 2-Row Modern Architecture */
 .rec-hotel-footer {
   margin-top: auto;
-  padding-top: 0.75rem;
+  padding-top: 0.85rem;
   border-top: 1px solid var(--color-border);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
 }
 
-.rec-price-block {
+.rec-hotel-price-row {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.rec-total-stay-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.rec-total-stay-price {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.rec-stay-duration-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .rec-nightly-rate {
   font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
-.rec-total-stay-price {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--color-primary);
-  line-height: 1.1;
+  font-weight: 700;
+  color: var(--color-accent);
+  white-space: nowrap;
+  text-align: right;
 }
 
 .rec-hotel-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.rec-btn-details,
+.rec-btn-select {
+  width: 100% !important;
+  justify-content: center !important;
+  padding: 0.5rem 0.65rem !important;
+  font-size: 0.82rem !important;
+  border-radius: var(--radius-md) !important;
+  white-space: nowrap !important;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
   gap: 0.35rem;
+}
+
+.rec-btn-select {
+  font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -1158,6 +1222,225 @@
 }
 
 /* ==========================================================================
+   STEP 5: YOUR COMPLETE JOURNEY SUMMARY & CONFIRMED STAY CARD
+   ========================================================================== */
+.review-journey-card {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+}
+
+.review-journey-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.review-section-subtitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.review-journey-meta {
+  text-align: right;
+}
+
+.review-travelers-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.review-budget-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-top: 0.2rem;
+}
+
+/* Confirmed Stay Reservation Card (Fixed Thumbnail & 2-Column Responsive Layout) */
+.review-stay-card {
+  padding: 1rem 1.25rem;
+  background: var(--color-surface-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-top: 0.65rem;
+  transition: all var(--transition-fast);
+}
+
+.review-stay-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.review-stay-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.review-stay-thumb-box {
+  width: 90px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-background-alt);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
+}
+
+.review-stay-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.review-stay-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.review-stay-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.review-stay-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-stay-meta {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-stay-pricing-box {
+  text-align: right;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.review-stay-duration-text {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.review-stay-total-price {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1.1;
+}
+
+.review-stay-change-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  border-color: rgba(232, 121, 79, 0.4);
+}
+
+.review-stay-change-btn:hover {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.review-stay-empty-card {
+  padding: 1rem 1.25rem;
+  background: var(--color-surface-alt);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.65rem;
+}
+
+@media (max-width: 640px) {
+  .review-journey-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .review-journey-meta {
+    text-align: left !important;
+    width: 100%;
+  }
+
+  .review-stay-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .review-stay-left {
+    width: 100%;
+  }
+
+  .review-stay-thumb-box {
+    width: 76px;
+    height: 64px;
+  }
+
+  .review-stay-pricing-box {
+    text-align: left;
+    align-items: flex-start;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--color-border);
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .review-stay-change-btn {
+    margin-top: 0;
+  }
+}
+
+/* ==========================================================================
    STEP 5: ITINERARY REVIEW & COMMITTED BUDGET TABLE
    ========================================================================== */
 .review-budget-table-box {
@@ -1414,19 +1697,10 @@
     padding-bottom: 1.25rem;
   }
 
-  .rec-hotel-footer {
+  .rec-hotel-price-row {
     flex-direction: column;
-    align-items: stretch;
-    gap: 0.65rem;
-  }
-
-  .rec-hotel-actions {
-    width: 100%;
-  }
-
-  .rec-hotel-actions .btn {
-    flex: 1;
-    justify-content: center;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 
   .budget-key-metrics-grid {

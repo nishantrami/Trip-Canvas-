@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useToast } from './ToastContext';
 import { DESTINATIONS as DEFAULT_DESTINATIONS, CATEGORIES } from '../data/destinations';
+import { HOTELS as DEFAULT_HOTELS } from '../data/hotels';
+import { RESTAURANTS as DEFAULT_RESTAURANTS } from '../data/restaurants';
 import { generateId } from '../utils/helpers';
 
 const AdminContext = createContext();
@@ -30,6 +32,10 @@ export function AdminProvider({ children }) {
   const [isSecretModalOpen, setIsSecretModalOpen] = useState(false);
   const [customDestinations, setCustomDestinations] = useLocalStorage('tripcanvas_custom_destinations', []);
   const [deletedDestinationIds, setDeletedDestinationIds] = useLocalStorage('tripcanvas_deleted_dest_ids', []);
+  const [customHotels, setCustomHotels] = useLocalStorage('tripcanvas_custom_hotels', []);
+  const [deletedHotelIds, setDeletedHotelIds] = useLocalStorage('tripcanvas_deleted_hotel_ids', []);
+  const [customRestaurants, setCustomRestaurants] = useLocalStorage('tripcanvas_custom_restaurants', []);
+  const [deletedRestaurantIds, setDeletedRestaurantIds] = useLocalStorage('tripcanvas_deleted_restaurant_ids', []);
   const [auditLogs, setAuditLogs] = useLocalStorage('tripcanvas_admin_audit_logs', INITIAL_AUDIT_LOGS);
   const [platformConfig, setPlatformConfig] = useLocalStorage('tripcanvas_admin_config', {
     siteName: 'TripCanvas',
@@ -185,6 +191,240 @@ export function AdminProvider({ children }) {
     updateDestination(id, { isFeatured: !dest.isFeatured });
     showToast(`Updated featured status for ${dest.name}`, 'info');
   }, [allDestinations, updateDestination, showToast]);
+
+  // Combined live hotels (Default + Custom - Deleted)
+  const allHotels = React.useMemo(() => {
+    const deletedSet = new Set(deletedHotelIds || []);
+    const defaultsFiltered = (DEFAULT_HOTELS || []).filter((h) => !deletedSet.has(h.id));
+
+    const customMap = new Map();
+    (customHotels || []).forEach((ch) => {
+      customMap.set(ch.id, ch);
+    });
+
+    const merged = defaultsFiltered.map((h) => {
+      if (customMap.has(h.id)) {
+        const custom = customMap.get(h.id);
+        customMap.delete(h.id);
+        return custom;
+      }
+      return h;
+    });
+
+    customMap.forEach((ch) => {
+      if (!deletedSet.has(ch.id)) {
+        merged.unshift(ch);
+      }
+    });
+
+    return merged;
+  }, [customHotels, deletedHotelIds]);
+
+  // Hotel CRUD Operations
+  const addHotel = useCallback((hotelData) => {
+    const cleanDestId = (hotelData.destinationId || 'udaipur').toLowerCase().trim();
+    const newId = hotelData.id || `htl_${cleanDestId}_${Date.now().toString(36)}`;
+    const newHotel = {
+      id: newId,
+      name: hotelData.name,
+      destinationId: cleanDestId,
+      destinationName: hotelData.destinationName || (hotelData.city ? hotelData.city : 'Udaipur'),
+      city: hotelData.city || hotelData.destinationName || 'Udaipur',
+      state: hotelData.state || 'India',
+      country: hotelData.country || 'India',
+      category: hotelData.category || '5-Star Luxury Stay',
+      type: hotelData.type || 'Boutique',
+      rating: Number(hotelData.rating) || 4.85,
+      reviewsCount: Number(hotelData.reviewsCount) || 120,
+      badge: hotelData.badge || 'Verified Luxury Stay',
+      tagline: hotelData.tagline || `Premier stay in ${hotelData.city || 'India'}`,
+      address: hotelData.address || `${hotelData.city || 'India'}, India`,
+      nearLocation: hotelData.nearLocation || `Central ${hotelData.city || 'India'}`,
+      distanceToLandmarks: hotelData.distanceToLandmarks || [
+        { landmark: 'City Center', distance: '0.8 km' },
+        { landmark: 'Main Airport / Station', distance: '12 km' }
+      ],
+      pricePerNight: Number(hotelData.pricePerNight) || 4500,
+      originalPrice: Number(hotelData.originalPrice) || Math.round((Number(hotelData.pricePerNight) || 4500) * 1.25),
+      heroImage: hotelData.heroImage || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop',
+      gallery: Array.isArray(hotelData.gallery) && hotelData.gallery.length > 0 ? hotelData.gallery : [
+        hotelData.heroImage || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200&auto=format&fit=crop'
+      ],
+      description: hotelData.description || 'An extraordinary stay offering unparalleled luxury, impeccable hospitality, and scenic surroundings.',
+      amenities: Array.isArray(hotelData.amenities)
+        ? hotelData.amenities
+        : (hotelData.amenities || 'Free Wi-Fi, Swimming Pool, Free Breakfast').split(',').map(s => s.trim()).filter(Boolean),
+      roomTypes: Array.isArray(hotelData.roomTypes) && hotelData.roomTypes.length > 0 ? hotelData.roomTypes : [
+        {
+          id: `room_${newId}_standard`,
+          name: 'Deluxe Room',
+          price: Number(hotelData.pricePerNight) || 4500,
+          size: '350 sq.ft',
+          bed: 'King Bed',
+          maxGuests: 2,
+          image: hotelData.heroImage || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=800&auto=format&fit=crop',
+          perks: ['Free Breakfast', 'Free Wi-Fi', 'City/Nature View']
+        }
+      ],
+      coordinates: hotelData.coordinates || { lat: 24.5854, lng: 73.7125 },
+      policies: hotelData.policies || {
+        checkIn: '02:00 PM',
+        checkOut: '11:00 AM',
+        cancellation: 'Free cancellation up to 24 hours',
+        petsAllowed: false
+      },
+      createdAt: new Date().toISOString()
+    };
+
+    setCustomHotels((prev) => [newHotel, ...(prev || [])]);
+    setDeletedHotelIds((prev) => (prev || []).filter(id => id !== newId));
+    logAdminAction('Created Hotel', `Added new hotel: "${newHotel.name}" (${newHotel.city})`);
+    showToast(`Added hotel "${newHotel.name}" successfully!`, 'success');
+    window.dispatchEvent(new Event('storage'));
+    return newHotel;
+  }, [setCustomHotels, setDeletedHotelIds, logAdminAction, showToast]);
+
+  const updateHotel = useCallback((id, updatedFields) => {
+    setCustomHotels((prev) => {
+      const existingIdx = (prev || []).findIndex(h => h.id === id);
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = { ...updated[existingIdx], ...updatedFields };
+        return updated;
+      }
+      const baseHotel = (DEFAULT_HOTELS || []).find(h => h.id === id) || {};
+      const newOverride = { ...baseHotel, ...updatedFields, id };
+      return [newOverride, ...(prev || [])];
+    });
+
+    logAdminAction('Updated Hotel', `Updated details for hotel: "${updatedFields.name || id}"`);
+    showToast(`Hotel updated successfully`, 'success');
+    window.dispatchEvent(new Event('storage'));
+  }, [setCustomHotels, logAdminAction, showToast]);
+
+  const deleteHotel = useCallback((id) => {
+    setCustomHotels((prev) => (prev || []).filter(h => h.id !== id));
+    setDeletedHotelIds((prev) => [...new Set([...(prev || []), id])]);
+
+    logAdminAction('Deleted Hotel', `Removed hotel ID: ${id}`);
+    showToast(`Hotel removed from catalogue`, 'info');
+    window.dispatchEvent(new Event('storage'));
+  }, [setCustomHotels, setDeletedHotelIds, logAdminAction, showToast]);
+
+  // Combined live restaurants (Default + Custom - Deleted)
+  const allRestaurants = React.useMemo(() => {
+    const deletedSet = new Set(deletedRestaurantIds || []);
+    const defaultsFiltered = (DEFAULT_RESTAURANTS || []).filter((r) => !deletedSet.has(r.id));
+
+    const customMap = new Map();
+    (customRestaurants || []).forEach((cr) => {
+      customMap.set(cr.id, cr);
+    });
+
+    const merged = defaultsFiltered.map((r) => {
+      if (customMap.has(r.id)) {
+        const custom = customMap.get(r.id);
+        customMap.delete(r.id);
+        return custom;
+      }
+      return r;
+    });
+
+    customMap.forEach((cr) => {
+      if (!deletedSet.has(cr.id)) {
+        merged.unshift(cr);
+      }
+    });
+
+    return merged;
+  }, [customRestaurants, deletedRestaurantIds]);
+
+  // Restaurant CRUD Operations
+  const addRestaurant = useCallback((restaurantData) => {
+    const cleanDestId = (restaurantData.destinationId || 'udaipur').toLowerCase().trim();
+    const newId = restaurantData.id || `rest_${cleanDestId}_${Date.now().toString(36)}`;
+    const newRest = {
+      id: newId,
+      name: restaurantData.name,
+      destinationId: cleanDestId,
+      destinationName: restaurantData.destinationName || (restaurantData.city ? restaurantData.city : 'Udaipur'),
+      city: restaurantData.city || restaurantData.destinationName || 'Udaipur',
+      state: restaurantData.state || 'India',
+      country: restaurantData.country || 'India',
+      rating: Number(restaurantData.rating) || 4.85,
+      reviewsCount: Number(restaurantData.reviewsCount) || 120,
+      badge: restaurantData.badge || 'Chef Recommended',
+      tagline: restaurantData.tagline || `Authentic fine dining in ${restaurantData.city || 'India'}`,
+      address: restaurantData.address || `${restaurantData.city || 'India'}, India`,
+      nearLocation: restaurantData.nearLocation || `Downtown ${restaurantData.city || 'India'}`,
+      distanceToLandmarks: restaurantData.distanceToLandmarks || [
+        { landmark: 'City Center', distance: '0.5 km' }
+      ],
+      priceRange: restaurantData.priceRange || '₹₹',
+      costForTwo: Number(restaurantData.costForTwo) || 1600,
+      heroImage: restaurantData.heroImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop',
+      gallery: Array.isArray(restaurantData.gallery) && restaurantData.gallery.length > 0 ? restaurantData.gallery : [
+        restaurantData.heroImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop'
+      ],
+      cuisines: Array.isArray(restaurantData.cuisines)
+        ? restaurantData.cuisines
+        : (restaurantData.cuisines || 'North Indian, Continental').split(',').map(s => s.trim()).filter(Boolean),
+      timing: restaurantData.timing || '12:00 PM - 11:00 PM',
+      description: restaurantData.description || 'An inviting dining experience serving authentic delicacies crafted with freshest regional ingredients.',
+      specialties: Array.isArray(restaurantData.specialties)
+        ? restaurantData.specialties
+        : (restaurantData.specialties || 'Signature Chef Platter').split(',').map(s => s.trim()).filter(Boolean),
+      features: Array.isArray(restaurantData.features)
+        ? restaurantData.features
+        : (restaurantData.features || 'Scenic Ambience, Candlelight Seating, Free Wi-Fi').split(',').map(s => s.trim()).filter(Boolean),
+      seatingAreas: restaurantData.seatingAreas || [
+        { id: 'standard_dining', name: 'Main Dining Hall', fee: 0, note: 'Comfortable air-conditioned indoor seating' }
+      ],
+      timeSlots: restaurantData.timeSlots || ['12:30 PM', '01:30 PM', '07:30 PM', '08:30 PM'],
+      coordinates: restaurantData.coordinates || { lat: 24.5854, lng: 73.7125 },
+      phone: restaurantData.phone || '+91 98765 43210',
+      policies: restaurantData.policies || {
+        reservationDeposit: 'Zero advance fee',
+        dressCode: 'Smart Casual',
+        alcoholServed: false
+      },
+      createdAt: new Date().toISOString()
+    };
+
+    setCustomRestaurants((prev) => [newRest, ...(prev || [])]);
+    setDeletedRestaurantIds((prev) => (prev || []).filter(id => id !== newId));
+    logAdminAction('Created Restaurant', `Added new restaurant: "${newRest.name}" (${newRest.city})`);
+    showToast(`Added restaurant "${newRest.name}" successfully!`, 'success');
+    window.dispatchEvent(new Event('storage'));
+    return newRest;
+  }, [setCustomRestaurants, setDeletedRestaurantIds, logAdminAction, showToast]);
+
+  const updateRestaurant = useCallback((id, updatedFields) => {
+    setCustomRestaurants((prev) => {
+      const existingIdx = (prev || []).findIndex(r => r.id === id);
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = { ...updated[existingIdx], ...updatedFields };
+        return updated;
+      }
+      const baseRest = (DEFAULT_RESTAURANTS || []).find(r => r.id === id) || {};
+      const newOverride = { ...baseRest, ...updatedFields, id };
+      return [newOverride, ...(prev || [])];
+    });
+
+    logAdminAction('Updated Restaurant', `Updated details for restaurant: "${updatedFields.name || id}"`);
+    showToast(`Restaurant updated successfully`, 'success');
+    window.dispatchEvent(new Event('storage'));
+  }, [setCustomRestaurants, logAdminAction, showToast]);
+
+  const deleteRestaurant = useCallback((id) => {
+    setCustomRestaurants((prev) => (prev || []).filter(r => r.id !== id));
+    setDeletedRestaurantIds((prev) => [...new Set([...(prev || []), id])]);
+
+    logAdminAction('Deleted Restaurant', `Removed restaurant ID: ${id}`);
+    showToast(`Restaurant removed from catalogue`, 'info');
+    window.dispatchEvent(new Event('storage'));
+  }, [setCustomRestaurants, setDeletedRestaurantIds, logAdminAction, showToast]);
 
   // Seed Rich Sample Bookings and Demo Data
   const seedDemoData = useCallback(() => {
@@ -347,6 +587,10 @@ export function AdminProvider({ children }) {
         platformConfig,
         customDestinations,
         deletedDestinationIds,
+        customHotels,
+        deletedHotelIds,
+        customRestaurants,
+        deletedRestaurantIds,
         auditLogs,
         hotelBookings: JSON.parse(localStorage.getItem('tripcanvas_hotel_bookings') || '[]'),
         restaurantBookings: JSON.parse(localStorage.getItem('tripcanvas_restaurant_bookings') || '[]'),
@@ -367,15 +611,20 @@ export function AdminProvider({ children }) {
     } catch (e) {
       showToast('Failed to export backup', 'error');
     }
-  }, [platformConfig, customDestinations, deletedDestinationIds, auditLogs, logAdminAction, showToast]);
+  }, [platformConfig, customDestinations, deletedDestinationIds, customHotels, deletedHotelIds, customRestaurants, deletedRestaurantIds, auditLogs, logAdminAction, showToast]);
 
   const resetSystemData = useCallback(() => {
     setCustomDestinations([]);
     setDeletedDestinationIds([]);
+    setCustomHotels([]);
+    setDeletedHotelIds([]);
+    setCustomRestaurants([]);
+    setDeletedRestaurantIds([]);
     setAuditLogs(INITIAL_AUDIT_LOGS);
     logAdminAction('Factory Reset', 'Restored platform catalogue and settings to factory defaults');
     showToast('Platform catalogue restored to defaults', 'info');
-  }, [setCustomDestinations, setDeletedDestinationIds, setAuditLogs, logAdminAction, showToast]);
+    window.dispatchEvent(new Event('storage'));
+  }, [setCustomDestinations, setDeletedDestinationIds, setCustomHotels, setDeletedHotelIds, setCustomRestaurants, setDeletedRestaurantIds, setAuditLogs, logAdminAction, showToast]);
 
   return (
     <AdminContext.Provider
@@ -392,6 +641,14 @@ export function AdminProvider({ children }) {
         updateDestination,
         deleteDestination,
         toggleFeaturedDestination,
+        allHotels,
+        addHotel,
+        updateHotel,
+        deleteHotel,
+        allRestaurants,
+        addRestaurant,
+        updateRestaurant,
+        deleteRestaurant,
         platformConfig,
         setPlatformConfig,
         auditLogs,

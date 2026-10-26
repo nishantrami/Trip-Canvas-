@@ -3,6 +3,14 @@
    ========================================================================== */
 
 /* 1. Root & Sidebar Layout */
+.admin-portal-container {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
 .admin-portal-root {
   min-height: 100vh;
   background-color: #F8F9FB;
@@ -10,9 +18,10 @@
   font-family: var(--font-sans);
   display: flex;
   position: relative;
+  width: 100%;
 }
 
-/* 2. Left Sidebar (White Theme) */
+/* 2. Left Sidebar (White Theme) - Fixed in One Position */
 .admin-sidebar {
   width: 270px;
   background: #FFFFFF;
@@ -20,11 +29,15 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  position: sticky;
+  height: 100dvh;
+  position: fixed;
   top: 0;
+  left: 0;
+  bottom: 0;
   z-index: 60;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
 }
 
 .admin-sidebar-header {
@@ -151,6 +164,24 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  overscroll-behavior: contain;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 4px;
+}
+
+.admin-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
 }
 
 .admin-nav-section-label {
@@ -270,13 +301,16 @@
   background: #FEF2F2;
 }
 
-/* 3. Main Content Wrapper */
+/* 3. Main Content Wrapper - Offset by Fixed Sidebar */
 .admin-main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   background-color: #F8F9FB;
+  margin-left: 270px;
+  width: calc(100% - 270px);
+  min-height: 100vh;
 }
 
 /* 4. Topbar Header (White Theme) */
@@ -1332,6 +1366,70 @@
   color: var(--color-accent);
 }
 
+.admin-mini-pill {
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  background: #F3F4F6;
+  color: #4B5563;
+  border-radius: var(--radius-xs);
+  border: 1px solid #E5E7EB;
+  white-space: nowrap;
+}
+
+.admin-amenity-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.admin-amenity-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-sm);
+  color: #374151;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.admin-amenity-toggle-btn:hover {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+}
+
+.admin-amenity-toggle-btn.selected {
+  background: #FEF2EC;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.admin-checkbox-mini {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid #9CA3AF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #FFFFFF;
+}
+
+.admin-checkbox-mini.checked {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #FFFFFF;
+}
+
 .admin-image-preview-box {
   margin: 0.75rem 0 1.25rem;
   padding: 0.5rem;
@@ -1579,6 +1677,11 @@
 
   .admin-sidebar.open {
     transform: translateX(0);
+  }
+
+  .admin-main-wrapper {
+    margin-left: 0;
+    width: 100%;
   }
 
   .admin-sidebar-close-btn {

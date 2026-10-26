@@ -8,15 +8,11 @@ import {
   Building,
   Utensils,
   Users,
-  Shield,
-  ShieldCheck,
   TrendingUp,
-  CreditCard,
   Plus,
   Edit2,
   Trash2,
   Search,
-  Filter,
   CheckCircle2,
   XCircle,
   Clock,
@@ -29,14 +25,9 @@ import {
   RefreshCw,
   Activity,
   Star,
-  Check,
-  Tag,
   IndianRupee,
   Layers,
-  ArrowRight,
   Eye,
-  SlidersHorizontal,
-  FileSpreadsheet,
   Menu,
   X,
   ChevronRight
@@ -49,6 +40,10 @@ import { AddDestinationModal } from './AddDestinationModal';
 import { EditDestinationModal } from './EditDestinationModal';
 import { AddUserModal } from './AddUserModal';
 import { EditUserModal } from './EditUserModal';
+import { AddHotelModal } from './AddHotelModal';
+import { EditHotelModal } from './EditHotelModal';
+import { AddRestaurantModal } from './AddRestaurantModal';
+import { EditRestaurantModal } from './EditRestaurantModal';
 import './AdminDashboard.css';
 
 export function AdminDashboard() {
@@ -58,6 +53,10 @@ export function AdminDashboard() {
     categories,
     deleteDestination,
     toggleFeaturedDestination,
+    allHotels,
+    deleteHotel,
+    allRestaurants,
+    deleteRestaurant,
     platformConfig,
     setPlatformConfig,
     auditLogs,
@@ -71,7 +70,7 @@ export function AdminDashboard() {
   const navigate = useNavigate();
 
   // Active Tab State
-  const [activeTab, setActiveTab] = useState('overview'); // overview, destinations, bookings, users, trips, settings
+  const [activeTab, setActiveTab] = useState('overview'); // overview, destinations, hotels, restaurants, bookings, users, trips, settings
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Live Clock
@@ -84,6 +83,10 @@ export function AdminDashboard() {
   // Modals state
   const [isAddDestOpen, setIsAddDestOpen] = useState(false);
   const [editingDest, setEditingDest] = useState(null);
+  const [isAddHotelOpen, setIsAddHotelOpen] = useState(false);
+  const [editingHotel, setEditingHotel] = useState(null);
+  const [isAddRestaurantOpen, setIsAddRestaurantOpen] = useState(false);
+  const [editingRestaurant, setEditingRestaurant] = useState(null);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
@@ -145,6 +148,12 @@ export function AdminDashboard() {
   // Filter states
   const [destSearch, setDestSearch] = useState('');
   const [destCategory, setDestCategory] = useState('all');
+  const [hotelSearch, setHotelSearch] = useState('');
+  const [hotelDestFilter, setHotelDestFilter] = useState('all');
+  const [hotelTypeFilter, setHotelTypeFilter] = useState('all');
+  const [restSearch, setRestSearch] = useState('');
+  const [restDestFilter, setRestDestFilter] = useState('all');
+  const [restCuisineFilter, setRestCuisineFilter] = useState('all');
   const [bookingFilterType, setBookingFilterType] = useState('all'); // all, hotel, restaurant
   const [bookingStatusFilter, setBookingStatusFilter] = useState('all');
   const [bookingSearch, setBookingSearch] = useState('');
@@ -163,6 +172,56 @@ export function AdminDashboard() {
       return matchSearch && matchCat;
     });
   }, [allDestinations, destSearch, destCategory]);
+
+  // Filtered Hotels
+  const filteredHotels = useMemo(() => {
+    return (allHotels || []).filter((h) => {
+      const q = hotelSearch.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        h.name?.toLowerCase().includes(q) ||
+        h.city?.toLowerCase().includes(q) ||
+        h.destinationName?.toLowerCase().includes(q) ||
+        h.nearLocation?.toLowerCase().includes(q) ||
+        h.category?.toLowerCase().includes(q);
+
+      const matchDest =
+        hotelDestFilter === 'all' ||
+        h.destinationId?.toLowerCase() === hotelDestFilter.toLowerCase() ||
+        h.city?.toLowerCase().includes(hotelDestFilter.toLowerCase());
+
+      const matchType =
+        hotelTypeFilter === 'all' ||
+        h.type?.toLowerCase() === hotelTypeFilter.toLowerCase();
+
+      return matchSearch && matchDest && matchType;
+    });
+  }, [allHotels, hotelSearch, hotelDestFilter, hotelTypeFilter]);
+
+  // Filtered Restaurants
+  const filteredRestaurants = useMemo(() => {
+    return (allRestaurants || []).filter((r) => {
+      const q = restSearch.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        r.name?.toLowerCase().includes(q) ||
+        r.city?.toLowerCase().includes(q) ||
+        r.destinationName?.toLowerCase().includes(q) ||
+        r.nearLocation?.toLowerCase().includes(q) ||
+        r.cuisines?.some((c) => c.toLowerCase().includes(q));
+
+      const matchDest =
+        restDestFilter === 'all' ||
+        r.destinationId?.toLowerCase() === restDestFilter.toLowerCase() ||
+        r.city?.toLowerCase().includes(restDestFilter.toLowerCase());
+
+      const matchCuisine =
+        restCuisineFilter === 'all' ||
+        r.cuisines?.some((c) => c.toLowerCase().includes(restCuisineFilter.toLowerCase()));
+
+      return matchSearch && matchDest && matchCuisine;
+    });
+  }, [allRestaurants, restSearch, restDestFilter, restCuisineFilter]);
 
   // Combined and Filtered Bookings
   const allBookingsList = useMemo(() => {
@@ -288,6 +347,20 @@ export function AdminDashboard() {
     }
   };
 
+  // Delete Hotel
+  const handleDeleteHotel = (hotelId, hotelName) => {
+    if (window.confirm(`Are you sure you want to permanently delete hotel "${hotelName}"?`)) {
+      deleteHotel(hotelId);
+    }
+  };
+
+  // Delete Restaurant
+  const handleDeleteRestaurant = (restaurantId, restaurantName) => {
+    if (window.confirm(`Are you sure you want to permanently delete restaurant "${restaurantName}"?`)) {
+      deleteRestaurant(restaurantId);
+    }
+  };
+
   // Delete Trip
   const handleDeleteTrip = (tripId, tripTitle) => {
     if (window.confirm(`Are you sure you want to delete itinerary "${tripTitle}"?`)) {
@@ -329,9 +402,11 @@ export function AdminDashboard() {
   const navItems = [
     { id: 'overview', label: 'Overview & Analytics', icon: Activity, count: null },
     { id: 'destinations', label: 'Destinations Catalogue', icon: MapPin, count: allDestinations.length },
-    { id: 'bookings', label: 'Bookings & Stays', icon: Building, count: totalBookingsCount },
+    { id: 'hotels', label: 'Hotels & Stays', icon: Building, count: (allHotels || []).length },
+    { id: 'restaurants', label: 'Restaurants & Dining', icon: Utensils, count: (allRestaurants || []).length },
+    { id: 'bookings', label: 'Bookings & Stays', icon: Calendar, count: totalBookingsCount },
     { id: 'users', label: 'Explorer Accounts', icon: Users, count: registeredUsers.length },
-    { id: 'trips', label: 'User Itineraries', icon: Calendar, count: userTrips.length },
+    { id: 'trips', label: 'User Itineraries', icon: Compass, count: userTrips.length },
     { id: 'settings', label: 'Settings & Database', icon: Settings, count: null }
   ];
 
@@ -592,6 +667,28 @@ export function AdminDashboard() {
                       </button>
 
                       <button
+                        onClick={() => setIsAddHotelOpen(true)}
+                        className="admin-launchpad-btn"
+                      >
+                        <Building size={18} className="text-accent" />
+                        <div>
+                          <div className="font-semibold">Add Hotel</div>
+                          <div className="text-xs text-muted">Create stay & suite</div>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setIsAddRestaurantOpen(true)}
+                        className="admin-launchpad-btn"
+                      >
+                        <Utensils size={18} className="text-warning" />
+                        <div>
+                          <div className="font-semibold">Add Restaurant</div>
+                          <div className="text-xs text-muted">Create dining place</div>
+                        </div>
+                      </button>
+
+                      <button
                         onClick={() => setIsAddUserOpen(true)}
                         className="admin-launchpad-btn"
                       >
@@ -834,6 +931,379 @@ export function AdminDashboard() {
                       <tr>
                         <td colSpan={7} className="text-center py-8 text-muted">
                           No destinations matching your search filter.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ========================================================
+              TAB: HOTELS & STAYS CATALOGUE MANAGER
+              ======================================================== */}
+          {activeTab === 'hotels' && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18 }}
+              className="admin-tab-pane"
+            >
+              {/* Controls Bar */}
+              <div className="admin-controls-card">
+                <div className="admin-search-wrapper">
+                  <Search size={16} className="admin-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search hotels by name, city, landmark, category..."
+                    className="admin-search-input"
+                    value={hotelSearch}
+                    onChange={(e) => setHotelSearch(e.target.value)}
+                  />
+                  {hotelSearch && (
+                    <button onClick={() => setHotelSearch('')} className="admin-search-clear">
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div className="admin-filter-group">
+                  <select
+                    className="admin-select-input"
+                    value={hotelDestFilter}
+                    onChange={(e) => setHotelDestFilter(e.target.value)}
+                  >
+                    <option value="all">All Destinations ({allHotels.length})</option>
+                    {allDestinations.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    className="admin-select-input"
+                    value={hotelTypeFilter}
+                    onChange={(e) => setHotelTypeFilter(e.target.value)}
+                  >
+                    <option value="all">All Property Types</option>
+                    <option value="palace">Palaces</option>
+                    <option value="resort">Luxury Resorts</option>
+                    <option value="haveli">Heritage Havelis</option>
+                    <option value="boutique">Boutique Stays</option>
+                    <option value="chalet">Mountain Chalets</option>
+                    <option value="houseboat">Houseboats</option>
+                    <option value="hotel">Standard Hotels</option>
+                  </select>
+
+                  <button
+                    onClick={() => setIsAddHotelOpen(true)}
+                    className="btn btn-primary btn-sm flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add Hotel
+                  </button>
+                </div>
+              </div>
+
+              {/* Hotels Table */}
+              <div className="admin-table-card">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Hotel & Stay</th>
+                      <th>Type & Category</th>
+                      <th>Price / Night</th>
+                      <th>Rating & Reviews</th>
+                      <th>Key Amenities</th>
+                      <th>Landmark / Near</th>
+                      <th className="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredHotels.map((h) => (
+                      <tr key={h.id}>
+                        <td>
+                          <div className="admin-dest-cell">
+                            <img
+                              src={h.heroImage || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=200'}
+                              alt={h.name}
+                              className="admin-dest-thumb"
+                            />
+                            <div>
+                              <div className="font-semibold text-primary">{h.name}</div>
+                              <div className="text-xs text-muted">
+                                {h.city || h.destinationName}, {h.state}
+                              </div>
+                              {h.badge && (
+                                <span className="badge badge-accent badge-xs mt-1 inline-block">
+                                  {h.badge}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className="badge badge-subtle">{h.type || 'Stay'}</span>
+                            <span className="text-xs text-muted truncate max-w-[160px]">{h.category}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-primary">{formatCurrency(h.pricePerNight || 0)}</span>
+                            {h.originalPrice > h.pricePerNight && (
+                              <span className="text-xs text-muted line-through">
+                                {formatCurrency(h.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex items-center gap-1">
+                            <Star size={14} className="text-amber fill-amber" />
+                            <span className="font-semibold text-primary">{h.rating || '4.8'}</span>
+                            <span className="text-xs text-muted">({h.reviewsCount || 0})</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {(h.amenities || []).slice(0, 3).map((a, idx) => (
+                              <span key={idx} className="admin-mini-pill">
+                                {a}
+                              </span>
+                            ))}
+                            {(h.amenities || []).length > 3 && (
+                              <span className="admin-mini-pill text-accent font-semibold">
+                                +{(h.amenities || []).length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="text-xs text-secondary font-medium truncate max-w-[150px] block" title={h.nearLocation || h.address}>
+                            {h.nearLocation || h.address || 'Central'}
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <div className="admin-actions-cell">
+                            <Link
+                              to={`/hotels?destination=${h.destinationId || 'all'}`}
+                              target="_blank"
+                              className="admin-action-btn"
+                              title="Preview on Public Hotels Page"
+                            >
+                              <Eye size={15} />
+                            </Link>
+                            <button
+                              onClick={() => setEditingHotel(h)}
+                              className="admin-action-btn"
+                              title="Edit Hotel"
+                            >
+                              <Edit2 size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteHotel(h.id, h.name)}
+                              className="admin-action-btn danger"
+                              title="Delete Hotel"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredHotels.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="text-center py-8 text-muted">
+                          No hotels matching your search or filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ========================================================
+              TAB: RESTAURANTS & DINING CATALOGUE MANAGER
+              ======================================================== */}
+          {activeTab === 'restaurants' && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18 }}
+              className="admin-tab-pane"
+            >
+              {/* Controls Bar */}
+              <div className="admin-controls-card">
+                <div className="admin-search-wrapper">
+                  <Search size={16} className="admin-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search dining by name, city, landmark, cuisine..."
+                    className="admin-search-input"
+                    value={restSearch}
+                    onChange={(e) => setRestSearch(e.target.value)}
+                  />
+                  {restSearch && (
+                    <button onClick={() => setRestSearch('')} className="admin-search-clear">
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div className="admin-filter-group">
+                  <select
+                    className="admin-select-input"
+                    value={restDestFilter}
+                    onChange={(e) => setRestDestFilter(e.target.value)}
+                  >
+                    <option value="all">All Destinations ({allRestaurants.length})</option>
+                    {allDestinations.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    className="admin-select-input"
+                    value={restCuisineFilter}
+                    onChange={(e) => setRestCuisineFilter(e.target.value)}
+                  >
+                    <option value="all">All Cuisines</option>
+                    <option value="Rajasthani">Rajasthani</option>
+                    <option value="North Indian">North Indian</option>
+                    <option value="Seafood">Seafood</option>
+                    <option value="Mughlai">Mughlai</option>
+                    <option value="South Indian">South Indian</option>
+                    <option value="Gujarati">Gujarati Thali</option>
+                    <option value="Italian">Italian & Cafe</option>
+                    <option value="Pure Vegetarian">Pure Vegetarian</option>
+                  </select>
+
+                  <button
+                    onClick={() => setIsAddRestaurantOpen(true)}
+                    className="btn btn-primary btn-sm flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add Restaurant
+                  </button>
+                </div>
+              </div>
+
+              {/* Restaurants Table */}
+              <div className="admin-table-card">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Restaurant & Dining</th>
+                      <th>Cuisines</th>
+                      <th>Cost for Two</th>
+                      <th>Rating & Reviews</th>
+                      <th>Timings & Ambience</th>
+                      <th>Landmark / Near</th>
+                      <th className="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRestaurants.map((r) => (
+                      <tr key={r.id}>
+                        <td>
+                          <div className="admin-dest-cell">
+                            <img
+                              src={r.heroImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=200'}
+                              alt={r.name}
+                              className="admin-dest-thumb"
+                            />
+                            <div>
+                              <div className="font-semibold text-primary">{r.name}</div>
+                              <div className="text-xs text-muted">
+                                {r.city || r.destinationName}, {r.state}
+                              </div>
+                              {r.badge && (
+                                <span className="badge badge-accent badge-xs mt-1 inline-block">
+                                  {r.badge}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {(r.cuisines || []).slice(0, 2).map((c, idx) => (
+                              <span key={idx} className="badge badge-subtle text-xs">
+                                {c}
+                              </span>
+                            ))}
+                            {(r.cuisines || []).length > 2 && (
+                              <span className="admin-mini-pill text-accent font-semibold">
+                                +{(r.cuisines || []).length - 2}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-primary">{formatCurrency(r.costForTwo || 0)}</span>
+                            <span className="text-xs text-muted">{r.priceRange || '₹₹'}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex items-center gap-1">
+                            <Star size={14} className="text-amber fill-amber" />
+                            <span className="font-semibold text-primary">{r.rating || '4.8'}</span>
+                            <span className="text-xs text-muted">({r.reviewsCount || 0})</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-secondary font-medium truncate max-w-[180px] block" title={r.timing}>
+                              {r.timing || '12:00 PM - 11:00 PM'}
+                            </span>
+                            <span className="text-xs text-muted truncate max-w-[180px] block">
+                              {(r.features || []).slice(0, 2).join(' • ')}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="text-xs text-secondary font-medium truncate max-w-[150px] block" title={r.nearLocation || r.address}>
+                            {r.nearLocation || r.address || 'Central'}
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <div className="admin-actions-cell">
+                            <Link
+                              to={`/restaurants?destination=${r.destinationId || 'all'}`}
+                              target="_blank"
+                              className="admin-action-btn"
+                              title="Preview on Public Restaurants Page"
+                            >
+                              <Eye size={15} />
+                            </Link>
+                            <button
+                              onClick={() => setEditingRestaurant(r)}
+                              className="admin-action-btn"
+                              title="Edit Restaurant"
+                            >
+                              <Edit2 size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteRestaurant(r.id, r.name)}
+                              className="admin-action-btn danger"
+                              title="Delete Restaurant"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredRestaurants.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="text-center py-8 text-muted">
+                          No restaurants matching your search or filters.
                         </td>
                       </tr>
                     )}
@@ -1419,6 +1889,30 @@ export function AdminDashboard() {
         isOpen={Boolean(editingUser)}
         onClose={() => setEditingUser(null)}
         onUserUpdated={() => setRefreshKey((k) => k + 1)}
+      />
+
+      {/* Hotel Modals */}
+      <AddHotelModal
+        isOpen={isAddHotelOpen}
+        onClose={() => setIsAddHotelOpen(false)}
+      />
+
+      <EditHotelModal
+        hotel={editingHotel}
+        isOpen={Boolean(editingHotel)}
+        onClose={() => setEditingHotel(null)}
+      />
+
+      {/* Restaurant Modals */}
+      <AddRestaurantModal
+        isOpen={isAddRestaurantOpen}
+        onClose={() => setIsAddRestaurantOpen(false)}
+      />
+
+      <EditRestaurantModal
+        restaurant={editingRestaurant}
+        isOpen={Boolean(editingRestaurant)}
+        onClose={() => setEditingRestaurant(null)}
       />
     </div>
   );

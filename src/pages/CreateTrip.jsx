@@ -18,7 +18,8 @@ import {
   Car,
   Utensils,
   Ticket,
-  Eye
+  Eye,
+  RotateCcw
 } from 'lucide-react';
 import { destinationService } from '../services/destinationService';
 import { hotelService } from '../services/hotelService';
@@ -1122,6 +1123,7 @@ export function CreateTrip() {
                             </div>
 
                             {/* Card Body */}
+                            {/* Card Body */}
                             <div className="rec-hotel-body">
                               <div className="rec-hotel-type-row">
                                 <span className="rec-hotel-type-tag">{hotel.type || hotel.category}</span>
@@ -1130,8 +1132,8 @@ export function CreateTrip() {
                                     +{formatCurrency(hotel.overBudgetAmount)} above budget
                                   </span>
                                 ) : (
-                                  <span className="text-3xs text-success font-semibold">
-                                    ✓ Within Stay Budget
+                                  <span className="badge badge-success text-3xs font-bold">
+                                    ✓ Within Budget
                                   </span>
                                 )}
                               </div>
@@ -1147,7 +1149,7 @@ export function CreateTrip() {
 
                               {/* Distance to major attraction */}
                               {hotel.closestLandmark && (
-                                <div className="rec-landmark-proximity-pill">
+                                <div className="rec-landmark-proximity-pill" title={`${hotel.closestLandmark.landmark}: ${hotel.closestLandmark.distanceStr}`}>
                                   <span>📍 {hotel.closestLandmark.landmark}:</span>
                                   <strong>{hotel.closestLandmark.distanceStr}</strong>
                                 </div>
@@ -1177,35 +1179,44 @@ export function CreateTrip() {
 
                               {/* Footer Pricing & Actions */}
                               <div className="rec-hotel-footer">
-                                <div className="rec-price-block">
-                                  <span className="rec-nightly-rate">
-                                    {formatCurrency(hotel.pricePerNight)} / night
-                                  </span>
-                                  <div className="rec-total-stay-price">
-                                    {formatCurrency(hotel.totalStayCost)}
-                                    <span className="text-3xs font-normal text-muted ml-1">
-                                      for {nightsCount} nights
+                                <div className="rec-hotel-price-row">
+                                  <div className="rec-total-stay-price-wrap">
+                                    <span className="rec-total-stay-price">
+                                      {formatCurrency(hotel.totalStayCost)}
+                                    </span>
+                                    <span className="rec-stay-duration-label">
+                                      total ({nightsCount} {nightsCount === 1 ? 'night' : 'nights'})
                                     </span>
                                   </div>
+                                  <span className="rec-nightly-rate">
+                                    {formatCurrency(hotel.pricePerNight)}<span className="text-muted font-normal text-3xs"> / night</span>
+                                  </span>
                                 </div>
 
                                 <div className="rec-hotel-actions">
                                   <button
                                     type="button"
                                     onClick={() => handleOpenDetails(hotel)}
-                                    className="btn btn-outline btn-xs"
+                                    className="btn btn-outline btn-sm rec-btn-details"
                                     title="View hotel details & room options"
                                   >
-                                    <Eye size={12} />
+                                    <Eye size={13} />
                                     <span>Details</span>
                                   </button>
 
                                   <button
                                     type="button"
                                     onClick={() => handleSelectHotel(hotel)}
-                                    className={`btn btn-xs ${isSelected ? 'btn-primary font-bold' : 'btn-outline'}`}
+                                    className={`btn btn-sm rec-btn-select ${isSelected ? 'btn-primary font-bold' : 'btn-outline'}`}
                                   >
-                                    {isSelected ? '✓ Selected' : 'Select'}
+                                    {isSelected ? (
+                                      <>
+                                        <Check size={14} />
+                                        <span>Selected</span>
+                                      </>
+                                    ) : (
+                                      <span>Select</span>
+                                    )}
                                   </button>
                                 </div>
                               </div>
@@ -1272,31 +1283,31 @@ export function CreateTrip() {
               </div>
 
               {/* Trip Overview Card */}
-              <div className="card p-5 mb-5 bg-surface border">
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b">
-                  <div>
-                    <span className="text-2xs font-bold text-muted uppercase">Destination</span>
+              <div className="card review-journey-card p-5 mb-5 bg-surface border">
+                <div className="review-journey-header-row pb-4 border-b">
+                  <div className="review-journey-destination">
+                    <span className="review-section-subtitle">Destination</span>
                     <h3 className="heading-3 mt-0.5">{selectedDest?.name}, {selectedDest?.country}</h3>
-                    <p className="text-xs text-muted flex items-center gap-1 mt-0.5">
-                      <Calendar size={13} className="text-accent" />
+                    <p className="text-xs text-muted flex items-center gap-1 mt-1">
+                      <Calendar size={13} className="text-accent flex-shrink-0" />
                       <span>{formData.startDate} to {formData.endDate} ({nightsCount} Nights / {daysCount} Days)</span>
                     </p>
                   </div>
 
-                  <div className="text-right">
-                    <span className="text-2xs font-bold text-muted uppercase">Travelers</span>
-                    <div className="text-base font-bold text-primary mt-0.5">
+                  <div className="review-journey-meta">
+                    <span className="review-section-subtitle">Travelers & Budget</span>
+                    <div className="review-travelers-val mt-0.5">
                       {formData.travelers} {formData.travelers === 1 ? 'Traveler' : 'Travelers'} ({formData.travelStyle})
                     </div>
-                    <span className="text-2xs text-accent font-semibold">
-                      Budget: {formatCurrency(formData.budget)}
+                    <span className="review-budget-tag">
+                      Total Budget: {formatCurrency(formData.budget)}
                     </span>
                   </div>
                 </div>
 
                 {/* Confirmed Reserved Hotel Stay Card */}
                 <div className="mt-4">
-                  <span className="text-2xs font-bold text-muted uppercase tracking-wider block mb-2">
+                  <span className="review-section-subtitle mb-2">
                     Confirmed Stay Reservation:
                   </span>
 
@@ -1306,54 +1317,67 @@ export function CreateTrip() {
                       const reviewRoom = formData.selectedHotel ? formData.selectedRoom : effectiveSelectedRoom;
                       const roomPrice = reviewRoom?.price || reviewHotel.pricePerNight || 0;
                       return (
-                        <div className="p-3.5 bg-surface-alt rounded-lg border flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={reviewHotel.heroImage}
-                              alt={reviewHotel.name}
-                              className="w-16 h-14 object-cover rounded-md"
-                            />
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="badge badge-primary text-3xs py-0.5 px-1.5 font-bold">
+                        <div className="review-stay-card">
+                          <div className="review-stay-left">
+                            <div className="review-stay-thumb-box">
+                              <img
+                                src={reviewHotel.heroImage}
+                                alt={reviewHotel.name}
+                                className="review-stay-thumb-img"
+                              />
+                            </div>
+                            <div className="review-stay-info">
+                              <div className="review-stay-badges-row">
+                                <span className="badge badge-primary text-3xs font-bold">
                                   {reviewHotel.type || 'Stay'}
                                 </span>
-                                <span className="badge badge-rating text-3xs py-0.5 px-1.5">
+                                <span className="badge badge-rating text-3xs">
                                   ★ {reviewHotel.rating}
                                 </span>
+                                <span className="badge badge-success text-3xs font-bold">
+                                  ✓ Confirmed Stay
+                                </span>
                               </div>
-                              <h4 className="font-bold text-sm text-primary mt-0.5">
+                              <h4 className="review-stay-name" title={reviewHotel.name}>
                                 {reviewHotel.name}
                               </h4>
-                              <p className="text-2xs text-muted">
-                                {reviewRoom?.name || 'Standard Room'} • {reviewHotel.nearLocation}
+                              <p className="review-stay-meta" title={`${reviewRoom?.name || 'Standard Room'} • ${reviewHotel.nearLocation}`}>
+                                <MapPin size={12} className="text-accent flex-shrink-0" />
+                                <span>{reviewRoom?.name || 'Standard Room'} • {reviewHotel.nearLocation}</span>
                               </p>
                             </div>
                           </div>
 
-                          <div className="text-right">
-                            <span className="text-2xs text-muted block">{nightsCount} Nights Accommodation:</span>
-                            <div className="text-base font-extrabold text-accent">
+                          <div className="review-stay-pricing-box">
+                            <span className="review-stay-duration-text">
+                              {nightsCount} {nightsCount === 1 ? 'Night' : 'Nights'} Accommodation:
+                            </span>
+                            <div className="review-stay-total-price">
                               {formatCurrency(roomPrice * nightsCount)}
                             </div>
                             <button
                               type="button"
                               onClick={() => setCurrentStep(4)}
-                              className="text-2xs text-accent hover:underline mt-0.5"
+                              className="btn btn-outline btn-xs review-stay-change-btn"
+                              title="Choose a different hotel"
                             >
-                              Change Hotel
+                              <RotateCcw size={12} />
+                              <span>Change Hotel</span>
                             </button>
                           </div>
                         </div>
                       );
                     })()
                   ) : (
-                    <div className="p-3 bg-surface-alt rounded-lg border text-center">
-                      <span className="text-xs text-muted">No hotel selected.</span>
+                    <div className="review-stay-empty-card">
+                      <div className="flex items-center gap-2">
+                        <Building size={18} className="text-muted flex-shrink-0" />
+                        <span className="text-xs text-muted font-medium">No hotel stay selected yet.</span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setCurrentStep(4)}
-                        className="btn btn-outline btn-xs ml-3 text-accent"
+                        className="btn btn-outline btn-xs text-accent"
                       >
                         Choose a Stay
                       </button>

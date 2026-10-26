@@ -1,21 +1,54 @@
 import { HOTELS, HOTEL_AMENITY_FILTERS } from '../data/hotels.js';
 
+export const getActiveHotels = () => {
+  try {
+    const custom = JSON.parse(localStorage.getItem('tripcanvas_custom_hotels') || '[]');
+    const deletedIds = JSON.parse(localStorage.getItem('tripcanvas_deleted_hotel_ids') || '[]');
+    const deletedSet = new Set(deletedIds);
+    const defaultsFiltered = HOTELS.filter(h => !deletedSet.has(h.id));
+
+    const customMap = new Map();
+    custom.forEach(ch => customMap.set(ch.id, ch));
+
+    const merged = defaultsFiltered.map(h => {
+      if (customMap.has(h.id)) {
+        const item = customMap.get(h.id);
+        customMap.delete(h.id);
+        return item;
+      }
+      return h;
+    });
+
+    customMap.forEach(ch => {
+      if (!deletedSet.has(ch.id)) {
+        merged.unshift(ch);
+      }
+    });
+
+    return merged;
+  } catch {
+    return HOTELS;
+  }
+};
+
 export const hotelService = {
   getAllHotels: () => {
-    return HOTELS;
+    return getActiveHotels();
   },
 
   getHotelById: (id) => {
     if (!id) return null;
     const cleanId = id.toLowerCase().trim();
-    return HOTELS.find(h => h.id.toLowerCase() === cleanId) || null;
+    return getActiveHotels().find(h => h.id.toLowerCase() === cleanId) || null;
   },
 
   getHotelsByDestination: (destinationId) => {
-    if (!destinationId) return HOTELS;
+    const all = getActiveHotels();
+    if (!destinationId) return all;
     const cleanDestId = destinationId.toLowerCase().trim();
-    return HOTELS.filter(
-      h => h.destinationId.toLowerCase() === cleanDestId || h.city.toLowerCase().includes(cleanDestId)
+    return all.filter(
+      h => (h.destinationId && h.destinationId.toLowerCase() === cleanDestId) ||
+           (h.city && h.city.toLowerCase().includes(cleanDestId))
     );
   },
 
@@ -24,15 +57,16 @@ export const hotelService = {
   },
 
   searchHotels: (query = '') => {
-    if (!query || !query.trim()) return HOTELS;
+    const all = getActiveHotels();
+    if (!query || !query.trim()) return all;
     const q = query.toLowerCase().trim();
 
-    return HOTELS.filter(h => {
-      const matchName = h.name.toLowerCase().includes(q);
-      const matchCity = h.city.toLowerCase().includes(q);
-      const matchDest = h.destinationName.toLowerCase().includes(q);
-      const matchNear = h.nearLocation.toLowerCase().includes(q);
-      const matchCat = h.category.toLowerCase().includes(q);
+    return all.filter(h => {
+      const matchName = h.name?.toLowerCase().includes(q);
+      const matchCity = h.city?.toLowerCase().includes(q);
+      const matchDest = h.destinationName?.toLowerCase().includes(q);
+      const matchNear = h.nearLocation?.toLowerCase().includes(q);
+      const matchCat = h.category?.toLowerCase().includes(q);
       const matchAmenity = h.amenities?.some(a => a.toLowerCase().includes(q));
 
       return matchName || matchCity || matchDest || matchNear || matchCat || matchAmenity;
@@ -49,7 +83,7 @@ export const hotelService = {
     type = 'all',
     sortBy = 'recommended'
   }) => {
-    let results = HOTELS;
+    let results = getActiveHotels();
 
     if (destination && destination !== 'all') {
       const destClean = destination.toLowerCase().trim();

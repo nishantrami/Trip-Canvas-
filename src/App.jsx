@@ -23,7 +23,7 @@ function AppLayout() {
     <div className="app-container">
       <TopLoadingBar />
       {!isAdminPath && <Navbar />}
-      <main className={isAdminPath ? 'admin-main-wrapper' : 'main-content'}>
+      <main className={isAdminPath ? 'admin-portal-container' : 'main-content'}>
         <AppRoutes />
       </main>
       {!isAdminPath && <Footer />}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -85,6 +85,13 @@ export function Hotels() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [bookingHotel, setBookingHotel] = useState(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const handleStorage = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const amenityList = hotelService.getAmenityFilters();
 
@@ -129,7 +136,7 @@ export function Hotels() {
       amenities: selectedAmenities,
       sortBy
     });
-  }, [selectedDestination, searchQuery, selectedType, priceMin, priceMax, minRating, selectedAmenities, sortBy]);
+  }, [selectedDestination, searchQuery, selectedType, priceMin, priceMax, minRating, selectedAmenities, sortBy, refreshKey]);
 
   return (
     <motion.div

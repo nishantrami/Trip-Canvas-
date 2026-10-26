@@ -1,21 +1,54 @@
 import { RESTAURANTS, RESTAURANT_CUISINE_FILTERS } from '../data/restaurants.js';
 
+export const getActiveRestaurants = () => {
+  try {
+    const custom = JSON.parse(localStorage.getItem('tripcanvas_custom_restaurants') || '[]');
+    const deletedIds = JSON.parse(localStorage.getItem('tripcanvas_deleted_restaurant_ids') || '[]');
+    const deletedSet = new Set(deletedIds);
+    const defaultsFiltered = RESTAURANTS.filter(r => !deletedSet.has(r.id));
+
+    const customMap = new Map();
+    custom.forEach(cr => customMap.set(cr.id, cr));
+
+    const merged = defaultsFiltered.map(r => {
+      if (customMap.has(r.id)) {
+        const item = customMap.get(r.id);
+        customMap.delete(r.id);
+        return item;
+      }
+      return r;
+    });
+
+    customMap.forEach(cr => {
+      if (!deletedSet.has(cr.id)) {
+        merged.unshift(cr);
+      }
+    });
+
+    return merged;
+  } catch {
+    return RESTAURANTS;
+  }
+};
+
 export const restaurantService = {
   getAllRestaurants: () => {
-    return RESTAURANTS;
+    return getActiveRestaurants();
   },
 
   getRestaurantById: (id) => {
     if (!id) return null;
     const cleanId = id.toLowerCase().trim();
-    return RESTAURANTS.find(r => r.id.toLowerCase() === cleanId) || null;
+    return getActiveRestaurants().find(r => r.id.toLowerCase() === cleanId) || null;
   },
 
   getRestaurantsByDestination: (destinationId) => {
-    if (!destinationId) return RESTAURANTS;
+    const all = getActiveRestaurants();
+    if (!destinationId) return all;
     const cleanDestId = destinationId.toLowerCase().trim();
-    return RESTAURANTS.filter(
-      r => r.destinationId.toLowerCase() === cleanDestId || r.city.toLowerCase().includes(cleanDestId)
+    return all.filter(
+      r => (r.destinationId && r.destinationId.toLowerCase() === cleanDestId) ||
+           (r.city && r.city.toLowerCase().includes(cleanDestId))
     );
   },
 
@@ -24,14 +57,15 @@ export const restaurantService = {
   },
 
   searchRestaurants: (query = '') => {
-    if (!query || !query.trim()) return RESTAURANTS;
+    const all = getActiveRestaurants();
+    if (!query || !query.trim()) return all;
     const q = query.toLowerCase().trim();
 
-    return RESTAURANTS.filter(r => {
-      const matchName = r.name.toLowerCase().includes(q);
-      const matchCity = r.city.toLowerCase().includes(q);
-      const matchDest = r.destinationName.toLowerCase().includes(q);
-      const matchNear = r.nearLocation.toLowerCase().includes(q);
+    return all.filter(r => {
+      const matchName = r.name?.toLowerCase().includes(q);
+      const matchCity = r.city?.toLowerCase().includes(q);
+      const matchDest = r.destinationName?.toLowerCase().includes(q);
+      const matchNear = r.nearLocation?.toLowerCase().includes(q);
       const matchCuisine = r.cuisines?.some(c => c.toLowerCase().includes(q));
       const matchSpec = r.specialties?.some(s => s.toLowerCase().includes(q));
 
@@ -48,7 +82,7 @@ export const restaurantService = {
     minRating = 0,
     sortBy = 'recommended'
   }) => {
-    let results = RESTAURANTS;
+    let results = getActiveRestaurants();
 
     if (destination && destination !== 'all') {
       const destClean = destination.toLowerCase().trim();
