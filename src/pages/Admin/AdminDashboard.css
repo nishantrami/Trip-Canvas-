@@ -778,46 +778,260 @@
 
 .admin-table {
   width: 100%;
-  min-width: 680px;
+  min-width: 1050px;
   border-collapse: collapse;
   text-align: left;
 }
 
 .admin-table thead th {
   background: #F9FAFB;
-  padding: 0.9rem 1.25rem;
+  padding: 0.85rem 1.15rem;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   color: #6B7280;
   letter-spacing: 0.05em;
   border-bottom: 1px solid #E5E7EB;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .admin-table tbody td {
-  padding: 0.95rem 1.25rem;
+  padding: 0.95rem 1.15rem;
   font-size: 0.86rem;
   border-bottom: 1px solid #F3F4F6;
   vertical-align: middle;
   color: #374151;
 }
 
+.admin-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
 .admin-table tbody tr:hover td {
   background: #FAFAFB;
 }
 
+/* Common Cell Styles */
 .admin-dest-cell {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 220px;
 }
 
 .admin-dest-thumb {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
   object-fit: cover;
   border: 1px solid #E5E7EB;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Hotel & Stay Catalogue Table Enhancements */
+.admin-hotels-table tbody td {
+  padding: 0.95rem 1.15rem;
+}
+
+.admin-hotel-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 240px;
+}
+
+.admin-hotel-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 1px solid #E5E7EB;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.admin-hotel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.admin-hotel-name {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 195px;
+}
+
+.admin-hotel-loc {
+  font-size: 0.74rem;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 195px;
+}
+
+.admin-hotel-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: #FEF2EC;
+  color: var(--color-accent);
+  border: 1px solid #FCDFD1;
+  margin-top: 2px;
+  white-space: nowrap;
+  max-width: 195px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-type-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 120px;
+}
+
+.admin-type-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #DBEAFE;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.admin-category-subtitle {
+  font-size: 0.73rem;
+  color: #6B7280;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 135px;
+}
+
+.admin-price-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 95px;
+}
+
+.admin-current-price {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+.admin-original-price {
+  font-size: 0.72rem;
+  color: #9CA3AF;
+  text-decoration: line-through;
+}
+
+.admin-price-sublabel {
+  font-size: 0.7rem;
+  color: #9CA3AF;
+}
+
+.admin-rating-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 110px;
+}
+
+.admin-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #B45309;
+  flex-shrink: 0;
+}
+
+.admin-reviews-count {
+  font-size: 0.74rem;
+  color: #6B7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.admin-amenities-cell {
+  min-width: 160px;
+  max-width: 220px;
+}
+
+.admin-amenities-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.admin-amenity-pill {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  background: #F3F4F6;
+  color: #374151;
+  border-radius: var(--radius-xs);
+  border: 1px solid #E5E7EB;
+  white-space: nowrap;
+  max-width: 135px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-amenity-pill.more {
+  background: #FEF2EC;
+  color: var(--color-accent);
+  border-color: #FCDFD1;
+  font-weight: 700;
+}
+
+.admin-landmark-cell {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 130px;
+  max-width: 180px;
+}
+
+.admin-landmark-text {
+  font-size: 0.78rem;
+  color: #4B5563;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-user-cell {
@@ -930,6 +1144,141 @@
   color: #DC2626;
   border-color: #FECACA;
   background: #FEF2F2;
+}
+
+/* Booking Category Toggle (in AddBookingModal) */
+.admin-booking-type-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  border-radius: var(--radius-md);
+  color: #4B5563;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.admin-booking-type-toggle:hover {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+  color: #111827;
+}
+
+.admin-booking-type-toggle.active {
+  background: #FEF2EC;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(232, 121, 79, 0.15);
+}
+
+/* Bookings & Stays Table Enhancements */
+.admin-bookings-table tbody td {
+  padding: 0.95rem 1.15rem;
+}
+
+.admin-booking-ref-badge {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  color: #1F2937;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.admin-booking-property-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 180px;
+}
+
+.admin-booking-property-name {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.admin-booking-property-sub {
+  font-size: 0.74rem;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.admin-booking-guest-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 160px;
+}
+
+.admin-booking-guest-name {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.admin-booking-guest-contact {
+  font-size: 0.73rem;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+.admin-booking-schedule-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 140px;
+}
+
+.admin-booking-schedule-date {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1F2937;
+  white-space: nowrap;
+}
+
+.admin-booking-schedule-sub {
+  font-size: 0.72rem;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-booking-amount-cell {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--color-accent);
+  white-space: nowrap;
+  min-width: 100px;
 }
 
 .admin-actions-cell {

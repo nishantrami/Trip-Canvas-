@@ -30,7 +30,8 @@ import {
   Eye,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useToast } from '../../context/ToastContext';
@@ -44,6 +45,7 @@ import { AddHotelModal } from './AddHotelModal';
 import { EditHotelModal } from './EditHotelModal';
 import { AddRestaurantModal } from './AddRestaurantModal';
 import { EditRestaurantModal } from './EditRestaurantModal';
+import { AddBookingModal } from './AddBookingModal';
 import './AdminDashboard.css';
 
 export function AdminDashboard() {
@@ -89,6 +91,7 @@ export function AdminDashboard() {
   const [editingRestaurant, setEditingRestaurant] = useState(null);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
 
   // Storage listener to refresh state on changes
   const [refreshKey, setRefreshKey] = useState(0);
@@ -700,6 +703,17 @@ export function AdminDashboard() {
                       </button>
 
                       <button
+                        onClick={() => setIsAddBookingOpen(true)}
+                        className="admin-launchpad-btn"
+                      >
+                        <Calendar size={18} className="text-accent" />
+                        <div>
+                          <div className="font-semibold">Create Booking</div>
+                          <div className="text-xs text-muted">Stay or dining reservation</div>
+                        </div>
+                      </button>
+
+                      <button
                         onClick={seedDemoData}
                         className="admin-launchpad-btn"
                       >
@@ -1008,35 +1022,36 @@ export function AdminDashboard() {
 
               {/* Hotels Table */}
               <div className="admin-table-card">
-                <table className="admin-table">
+                <table className="admin-table admin-hotels-table">
                   <thead>
                     <tr>
-                      <th>Hotel & Stay</th>
-                      <th>Type & Category</th>
-                      <th>Price / Night</th>
-                      <th>Rating & Reviews</th>
-                      <th>Key Amenities</th>
-                      <th>Landmark / Near</th>
-                      <th className="text-right">Actions</th>
+                      <th style={{ width: '26%' }}>Hotel & Stay</th>
+                      <th style={{ width: '14%' }}>Type & Category</th>
+                      <th style={{ width: '12%' }}>Price / Night</th>
+                      <th style={{ width: '14%' }}>Rating & Reviews</th>
+                      <th style={{ width: '17%' }}>Key Amenities</th>
+                      <th style={{ width: '12%' }}>Landmark / Near</th>
+                      <th style={{ width: '5%' }} className="text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredHotels.map((h) => (
                       <tr key={h.id}>
                         <td>
-                          <div className="admin-dest-cell">
+                          <div className="admin-hotel-cell">
                             <img
                               src={h.heroImage || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=200'}
                               alt={h.name}
-                              className="admin-dest-thumb"
+                              className="admin-hotel-thumb"
                             />
-                            <div>
-                              <div className="font-semibold text-primary">{h.name}</div>
-                              <div className="text-xs text-muted">
-                                {h.city || h.destinationName}, {h.state}
+                            <div className="admin-hotel-info">
+                              <div className="admin-hotel-name" title={h.name}>{h.name}</div>
+                              <div className="admin-hotel-loc">
+                                <MapPin size={11} className="text-accent flex-shrink-0" />
+                                <span>{h.city || h.destinationName}, {h.state}</span>
                               </div>
                               {h.badge && (
-                                <span className="badge badge-accent badge-xs mt-1 inline-block">
+                                <span className="admin-hotel-badge" title={h.badge}>
                                   {h.badge}
                                 </span>
                               )}
@@ -1044,46 +1059,63 @@ export function AdminDashboard() {
                           </div>
                         </td>
                         <td>
-                          <div className="flex flex-col gap-1 items-start">
-                            <span className="badge badge-subtle">{h.type || 'Stay'}</span>
-                            <span className="text-xs text-muted truncate max-w-[160px]">{h.category}</span>
+                          <div className="admin-type-cell">
+                            <span className="admin-type-pill">{h.type || 'Stay'}</span>
+                            <span className="admin-category-subtitle" title={h.category}>
+                              {h.category || 'Luxury Accommodation'}
+                            </span>
                           </div>
                         </td>
                         <td>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-primary">{formatCurrency(h.pricePerNight || 0)}</span>
-                            {h.originalPrice > h.pricePerNight && (
-                              <span className="text-xs text-muted line-through">
+                          <div className="admin-price-cell">
+                            <span className="admin-current-price font-mono">
+                              {formatCurrency(h.pricePerNight || 0)}
+                            </span>
+                            {h.originalPrice > h.pricePerNight ? (
+                              <span className="admin-original-price font-mono">
                                 {formatCurrency(h.originalPrice)}
                               </span>
+                            ) : (
+                              <span className="admin-price-sublabel">per night</span>
                             )}
                           </div>
                         </td>
                         <td>
-                          <div className="flex items-center gap-1">
-                            <Star size={14} className="text-amber fill-amber" />
-                            <span className="font-semibold text-primary">{h.rating || '4.8'}</span>
-                            <span className="text-xs text-muted">({h.reviewsCount || 0})</span>
+                          <div className="admin-rating-cell">
+                            <div className="admin-rating-pill">
+                              <Star size={12} fill="#F59E0B" color="#F59E0B" />
+                              <span>{h.rating ? Number(h.rating).toFixed(1) : '4.8'}</span>
+                            </div>
+                            <span className="admin-reviews-count">
+                              ({(h.reviewsCount || 0).toLocaleString()})
+                            </span>
                           </div>
                         </td>
                         <td>
-                          <div className="flex flex-wrap gap-1 max-w-[200px]">
-                            {(h.amenities || []).slice(0, 3).map((a, idx) => (
-                              <span key={idx} className="admin-mini-pill">
-                                {a}
-                              </span>
-                            ))}
-                            {(h.amenities || []).length > 3 && (
-                              <span className="admin-mini-pill text-accent font-semibold">
-                                +{(h.amenities || []).length - 3}
-                              </span>
-                            )}
+                          <div className="admin-amenities-cell">
+                            <div className="admin-amenities-wrap">
+                              {(h.amenities || []).slice(0, 2).map((a, idx) => (
+                                <span key={idx} className="admin-amenity-pill" title={a}>
+                                  {a}
+                                </span>
+                              ))}
+                              {(h.amenities || []).length > 2 && (
+                                <span
+                                  className="admin-amenity-pill more"
+                                  title={(h.amenities || []).slice(2).join(', ')}
+                                >
+                                  +{(h.amenities || []).length - 2}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td>
-                          <span className="text-xs text-secondary font-medium truncate max-w-[150px] block" title={h.nearLocation || h.address}>
-                            {h.nearLocation || h.address || 'Central'}
-                          </span>
+                          <div className="admin-landmark-cell" title={h.nearLocation || h.address || 'Central Location'}>
+                            <span className="admin-landmark-text">
+                              {h.nearLocation || h.address || 'Central Location'}
+                            </span>
+                          </div>
                         </td>
                         <td className="text-right">
                           <div className="admin-actions-cell">
@@ -1345,9 +1377,9 @@ export function AdminDashboard() {
                     value={bookingFilterType}
                     onChange={(e) => setBookingFilterType(e.target.value)}
                   >
-                    <option value="all">All Booking Types</option>
-                    <option value="hotel">Hotel Stays Only</option>
-                    <option value="restaurant">Dining Reservations</option>
+                    <option value="all">All Booking Types ({totalBookingsCount})</option>
+                    <option value="hotel">Hotel Stays Only ({hotelBookings.length})</option>
+                    <option value="restaurant">Dining Reservations ({restaurantBookings.length})</option>
                   </select>
 
                   <select
@@ -1369,61 +1401,81 @@ export function AdminDashboard() {
                     <FileSpreadsheet size={15} />
                     <span>Export CSV</span>
                   </button>
+
+                  <button
+                    onClick={() => setIsAddBookingOpen(true)}
+                    className="btn btn-primary btn-sm flex items-center gap-2 font-bold"
+                  >
+                    <Plus size={16} /> Create Booking
+                  </button>
                 </div>
               </div>
 
               {/* Bookings Table */}
               <div className="admin-table-card">
-                <table className="admin-table">
+                <table className="admin-table admin-bookings-table">
                   <thead>
                     <tr>
-                      <th>Booking Ref</th>
-                      <th>Type & Property</th>
-                      <th>Guest Details</th>
-                      <th>Dates / Timeslot</th>
-                      <th>Total Value</th>
-                      <th>Status Management</th>
-                      <th className="text-right">Action</th>
+                      <th style={{ width: '13%' }}>Booking Ref</th>
+                      <th style={{ width: '22%' }}>Type & Property</th>
+                      <th style={{ width: '20%' }}>Primary Guest</th>
+                      <th style={{ width: '16%' }}>Dates / Schedule</th>
+                      <th style={{ width: '12%' }}>Total Value</th>
+                      <th style={{ width: '12%' }}>Status</th>
+                      <th style={{ width: '5%' }} className="text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {allBookingsList.map((booking) => (
                       <tr key={booking.id}>
                         <td>
-                          <span className="font-mono text-xs font-semibold bg-surface-alt px-2 py-1 rounded text-primary">
+                          <span className="admin-booking-ref-badge">
                             {booking.id}
                           </span>
                         </td>
                         <td>
-                          <div>
-                            <div className="font-semibold text-primary flex items-center gap-1.5">
+                          <div className="admin-booking-property-cell">
+                            <div className="admin-booking-property-name" title={booking.entityName}>
                               {booking.bookingType === 'Hotel Stay' ? (
-                                <Building size={14} className="text-accent" />
+                                <Building size={14} className="text-accent flex-shrink-0" />
                               ) : (
-                                <Utensils size={14} className="text-success" />
+                                <Utensils size={14} className="text-success flex-shrink-0" />
                               )}
                               <span>{booking.entityName}</span>
                             </div>
-                            <div className="text-xs text-muted">
-                              {booking.destinationName || 'India'} • {booking.roomType || booking.tableType || 'Standard'}
+                            <div className="admin-booking-property-sub">
+                              <span className="badge badge-subtle">{booking.destinationName || 'India'}</span>
+                              <span>•</span>
+                              <span>{booking.roomType || booking.tableType || 'Standard'}</span>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <div>
-                            <div className="font-medium text-primary">{booking.guestName || 'Valued Guest'}</div>
-                            <div className="text-xs text-muted">{booking.guestEmail || 'No email provided'}</div>
+                          <div className="admin-booking-guest-cell">
+                            <div className="admin-booking-guest-name">{booking.guestName || 'Valued Guest'}</div>
+                            <div className="admin-booking-guest-contact" title={booking.guestEmail}>
+                              {booking.guestEmail || 'No email provided'}
+                            </div>
                             {booking.guestPhone && (
-                              <div className="text-xs text-muted">{booking.guestPhone}</div>
+                              <div className="admin-booking-guest-contact text-muted">
+                                {booking.guestPhone}
+                              </div>
                             )}
                           </div>
                         </td>
                         <td>
-                          <div className="text-sm font-medium text-primary">{booking.dateDisplay}</div>
-                          <div className="text-xs text-muted">{booking.guests || 2} Guests</div>
+                          <div className="admin-booking-schedule-cell">
+                            <div className="admin-booking-schedule-date">{booking.dateDisplay}</div>
+                            <div className="admin-booking-schedule-sub">
+                              <Users size={12} className="text-muted" />
+                              <span>{booking.guests || 2} Guests</span>
+                            </div>
+                          </div>
                         </td>
                         <td>
-                          <span className="font-bold text-accent">{booking.amountDisplay}</span>
+                          <div className="admin-booking-amount-cell">
+                            {booking.amountDisplay}
+                          </div>
                         </td>
                         <td>
                           <select
@@ -1439,26 +1491,36 @@ export function AdminDashboard() {
                           </select>
                         </td>
                         <td className="text-right">
-                          <button
-                            onClick={() => handleDeleteBooking(booking.id, booking.bookingType)}
-                            className="admin-action-btn danger"
-                            title="Delete booking"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          <div className="admin-actions-cell">
+                            <button
+                              onClick={() => handleDeleteBooking(booking.id, booking.bookingType)}
+                              className="admin-action-btn danger"
+                              title="Delete booking"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                     {allBookingsList.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="text-center py-10 text-muted">
-                          No bookings found matching filters.
-                          <div className="mt-2">
+                        <td colSpan={7} className="text-center py-12 text-muted">
+                          <Calendar size={32} className="mx-auto mb-2 text-muted opacity-40" />
+                          <div className="font-semibold text-primary">No bookings found matching filters.</div>
+                          <p className="text-xs text-muted mt-1">Record a new booking or seed sample reservations.</p>
+                          <div className="mt-3 flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => setIsAddBookingOpen(true)}
+                              className="btn btn-primary btn-xs flex items-center gap-1.5"
+                            >
+                              <Plus size={14} /> Create Booking
+                            </button>
                             <button
                               onClick={seedDemoData}
-                              className="btn btn-outline btn-xs"
+                              className="btn btn-outline btn-xs flex items-center gap-1.5"
                             >
-                              Seed Sample Bookings
+                              <Sparkles size={14} /> Seed Sample Bookings
                             </button>
                           </div>
                         </td>
@@ -1913,6 +1975,12 @@ export function AdminDashboard() {
         restaurant={editingRestaurant}
         isOpen={Boolean(editingRestaurant)}
         onClose={() => setEditingRestaurant(null)}
+      />
+
+      {/* Booking Modals */}
+      <AddBookingModal
+        isOpen={isAddBookingOpen}
+        onClose={() => setIsAddBookingOpen(false)}
       />
     </div>
   );
