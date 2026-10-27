@@ -32,7 +32,8 @@ import {
   Wifi,
   Search,
   Tag,
-  RotateCcw
+  RotateCcw,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useTrips } from '../context/TripContext';
 import { destinationService } from '../services/destinationService';
@@ -46,11 +47,12 @@ import { AttractionCard } from '../components/destination/AttractionCard';
 import { AddToTripModal } from '../components/destination/AddToTripModal';
 import { HotelBookingModal } from '../components/hotel/HotelBookingModal';
 import { RestaurantReservationModal } from '../components/restaurant/RestaurantReservationModal';
-import { formatDateRange } from '../utils/helpers';
+import { formatDateRange, formatDate } from '../utils/helpers';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useToast } from '../context/ToastContext';
 import { pageVariants } from '../animations/motionVariants';
 import { DetailsLoadingAnimation } from '../components/common/DetailsLoadingAnimation';
+import './TripDetailsHotel.css';
 
 const TRIP_DETAIL_TABS = [
   { id: 'overview', label: 'Trip Overview', icon: Sparkles },
@@ -640,198 +642,287 @@ export function TripDetails() {
             {trip.selectedHotel && !isChangingHotel ? (
               <div className="trip-hotel-selected-view">
                 {/* Stay Header & Actions */}
-                <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-                  <div>
-                    <span className="badge badge-accent mb-1">Confirmed Accommodation</span>
-                    <h2 className="heading-2">{trip.selectedHotel.name}</h2>
-                    <p className="text-muted text-sm flex items-center gap-1.5">
-                      <MapPin size={14} className="text-accent" />
-                      {trip.selectedHotel.address || trip.selectedHotel.nearLocation}
+                <div className="hotel-header-banner">
+                  <div className="hotel-header-info">
+                    <div className="hotel-confirmed-badge">
+                      <span className="hotel-confirmed-dot" />
+                      Confirmed Accommodation • Ready
+                    </div>
+                    <h2 className="hotel-main-title">{trip.selectedHotel.name}</h2>
+                    <p className="hotel-location-row">
+                      <MapPin size={16} className="hotel-location-icon" />
+                      <span>{trip.selectedHotel.address || trip.selectedHotel.nearLocation}</span>
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="hotel-header-actions">
                     <button
                       type="button"
                       onClick={() => setIsChangingHotel(true)}
-                      className="btn btn-outline btn-sm flex items-center gap-1.5"
+                      className="hotel-action-btn-change"
                     >
-                      <RotateCcw size={14} /> Change Hotel
+                      <RotateCcw size={15} /> Change Hotel
                     </button>
                     <button
                       type="button"
                       onClick={handleRemoveHotel}
-                      className="btn btn-danger btn-sm flex items-center gap-1.5"
+                      className="hotel-action-btn-remove"
                     >
-                      <Trash2 size={14} /> Remove Stay
+                      <Trash2 size={15} /> Remove Stay
                     </button>
                     <Link
                       to="/hotels"
-                      className="btn btn-ghost btn-sm text-accent"
+                      className="hotel-browse-link"
                     >
-                      Browse All Hotels →
+                      Browse All Hotels <ArrowRight size={15} />
                     </Link>
                   </div>
                 </div>
 
                 {/* Main Hero Card with Gallery & Key Info */}
-                <div className="card p-0 mb-6 overflow-hidden">
-                  <div className="relative" style={{ height: '320px' }}>
+                <div className="hotel-showcase-card">
+                  <div className="hotel-hero-wrapper">
                     <img
                       src={trip.selectedHotel.heroImage}
                       alt={trip.selectedHotel.name}
-                      className="w-full h-full object-cover"
+                      className="hotel-hero-image"
                     />
-                    <div className="trip-hero-overlay" />
-                    <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                      <span className="badge badge-accent font-bold">
-                        {trip.selectedHotel.type || 'Luxury Stay'}
-                      </span>
-                      {trip.selectedHotel.badge && (
-                        <span className="badge badge-white font-bold text-primary">
-                          {trip.selectedHotel.badge}
+                    <div className="hotel-hero-gradient-overlay" />
+
+                    {/* Top Floating Badges */}
+                    <div className="hotel-hero-top-badges">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="hotel-badge-pill accent">
+                          <Building size={13} /> {trip.selectedHotel.type || 'Luxury Resort'}
                         </span>
+                        {trip.selectedHotel.badge && (
+                          <span className="hotel-badge-pill gold">
+                            <Sparkles size={13} /> {trip.selectedHotel.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="hotel-rating-badge">
+                        <Star size={14} fill="currentColor" />
+                        <span>{trip.selectedHotel.rating}</span>
+                        <span style={{ opacity: 0.85, fontWeight: 500, fontSize: '0.74rem' }}>
+                          ({trip.selectedHotel.reviewsCount || '1.2k+'} reviews)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Tagline & Gallery Count */}
+                    <div className="hotel-hero-bottom-info">
+                      <p className="hotel-tagline-quote">
+                        "{trip.selectedHotel.tagline || 'Experience timeless hospitality and tranquil surroundings in supreme comfort'}"
+                      </p>
+                      {trip.selectedHotel.gallery && trip.selectedHotel.gallery.length > 0 && (
+                        <div className="hotel-photo-count-pill">
+                          <ImageIcon size={13} /> {trip.selectedHotel.gallery.length + 1} Photos
+                        </div>
                       )}
                     </div>
-
-                    <div
-                      className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 rounded-full font-bold text-sm backdrop-blur"
-                      style={{ background: 'rgba(23, 32, 28, 0.85)', color: '#FFB800' }}
-                    >
-                      <Star size={14} fill="currentColor" /> {trip.selectedHotel.rating} ({trip.selectedHotel.reviewsCount || '1.2k+'} reviews)
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <p className="text-sm mb-1 italic" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                        "{trip.selectedHotel.tagline || 'Experience timeless hospitality and tranquil surroundings'}"
-                      </p>
-                    </div>
                   </div>
 
-                  {/* 4 Metric Stats Row */}
-                  <div className="overview-stats-grid p-6 border-b bg-surface-alt">
-                    <div className="stat-card-box">
-                      <Calendar size={18} className="text-accent mb-1" />
-                      <span className="text-2xs text-muted uppercase">Check-in</span>
-                      <h4 className="text-sm font-bold text-primary">{trip.startDate}</h4>
-                      <span className="text-3xs text-muted">From {trip.selectedHotel.policies?.checkIn || '02:00 PM'}</span>
+                  {/* 4 Metric Stay Stats Strip (High-Contrast & Elevated) */}
+                  <div className="hotel-metrics-strip">
+                    <div className="hotel-stat-card">
+                      <div className="hotel-stat-card-header">
+                        <div className="hotel-stat-icon-bubble accent">
+                          <Calendar size={18} />
+                        </div>
+                        <span className="hotel-stat-label">Check-in</span>
+                      </div>
+                      <div className="hotel-stat-value">
+                        {formatDate(trip.startDate, { day: 'numeric', month: 'short', year: 'numeric' }) || trip.startDate}
+                      </div>
+                      <span className="hotel-stat-subtext">
+                        From {trip.selectedHotel.policies?.checkIn || '02:00 PM'} • Front desk
+                      </span>
                     </div>
 
-                    <div className="stat-card-box">
-                      <Calendar size={18} className="text-accent mb-1" />
-                      <span className="text-2xs text-muted uppercase">Check-out</span>
-                      <h4 className="text-sm font-bold text-primary">{trip.endDate}</h4>
-                      <span className="text-3xs text-muted">Until {trip.selectedHotel.policies?.checkOut || '11:00 AM'}</span>
+                    <div className="hotel-stat-card">
+                      <div className="hotel-stat-card-header">
+                        <div className="hotel-stat-icon-bubble amber">
+                          <Calendar size={18} />
+                        </div>
+                        <span className="hotel-stat-label">Check-out</span>
+                      </div>
+                      <div className="hotel-stat-value">
+                        {formatDate(trip.endDate, { day: 'numeric', month: 'short', year: 'numeric' }) || trip.endDate}
+                      </div>
+                      <span className="hotel-stat-subtext">
+                        Until {trip.selectedHotel.policies?.checkOut || '11:00 AM'} • Key drop
+                      </span>
                     </div>
 
-                    <div className="stat-card-box">
-                      <Users size={18} className="text-accent mb-1" />
-                      <span className="text-2xs text-muted uppercase">Duration & Guests</span>
-                      <h4 className="text-sm font-bold text-primary">{trip.daysCount} Nights</h4>
-                      <span className="text-3xs text-muted">{trip.travelers} Guests ({trip.travelStyle})</span>
+                    <div className="hotel-stat-card">
+                      <div className="hotel-stat-card-header">
+                        <div className="hotel-stat-icon-bubble secondary">
+                          <Users size={18} />
+                        </div>
+                        <span className="hotel-stat-label">Duration & Guests</span>
+                      </div>
+                      <div className="hotel-stat-value">
+                        {trip.daysCount} Nights • {trip.travelers} Guests
+                      </div>
+                      <span className="hotel-stat-subtext">
+                        {trip.travelStyle || 'Standard'} Travel Style
+                      </span>
                     </div>
 
-                    <div className="stat-card-box">
-                      <IndianRupee size={18} className="text-accent mb-1" />
-                      <span className="text-2xs text-muted uppercase">Total Stay Cost</span>
-                      <h4 className="text-base font-bold text-accent">
+                    <div className="hotel-stat-card">
+                      <div className="hotel-stat-card-header">
+                        <div className="hotel-stat-icon-bubble accent">
+                          <IndianRupee size={18} />
+                        </div>
+                        <span className="hotel-stat-label">Total Stay Cost</span>
+                      </div>
+                      <div className="hotel-stat-value highlight">
                         {formatCurrency((trip.selectedRoom?.price || trip.selectedHotel.pricePerNight) * (trip.daysCount || 1))}
-                      </h4>
-                      <span className="text-3xs text-muted">
-                        {formatCurrency(trip.selectedRoom?.price || trip.selectedHotel.pricePerNight)} / night
+                      </div>
+                      <span className="hotel-stat-subtext">
+                        {formatCurrency(trip.selectedRoom?.price || trip.selectedHotel.pricePerNight)} / night • All taxes incl.
                       </span>
                     </div>
                   </div>
 
-                  {/* Content Grid */}
-                  <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Left 2 Cols: Room details, Description, Amenities */}
-                    <div className="md:col-span-2">
-                      {/* Reserved Room Specs */}
-                      <div className="p-4 bg-surface rounded-xl border mb-6">
-                        <div className="flex items-center gap-2 mb-2">
-                          <BedDouble size={18} className="text-accent" />
-                          <h4 className="text-base font-bold text-primary">
-                            Room: {trip.selectedRoom?.name || 'Deluxe Heritage Room'}
-                          </h4>
-                        </div>
-                        <div className="flex flex-wrap gap-4 text-xs text-muted mb-3">
-                          {trip.selectedRoom?.size && <span>Size: <strong>{trip.selectedRoom.size}</strong></span>}
-                          {trip.selectedRoom?.bed && <span>Bed: <strong>{trip.selectedRoom.bed}</strong></span>}
-                          {trip.selectedRoom?.maxGuests && <span>Capacity: <strong>Up to {trip.selectedRoom.maxGuests} Guests</strong></span>}
-                        </div>
-                        {trip.selectedRoom?.perks && trip.selectedRoom.perks.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {trip.selectedRoom.perks.map((perk, i) => (
-                              <span key={i} className="chip text-2xs bg-accent-subtle text-accent font-semibold">
-                                ✓ {perk}
+                  {/* Body Content Grid */}
+                  <div className="hotel-details-body">
+                    <div className="hotel-content-grid">
+                      {/* Left 2 Cols: Room Specs, Property Story, Amenities */}
+                      <div className="hotel-main-column">
+                        {/* Reserved Room Specs */}
+                        <div className="hotel-room-card">
+                          <div className="hotel-room-header">
+                            <div className="hotel-room-title-group">
+                              <div className="hotel-room-icon-box">
+                                <BedDouble size={20} />
+                              </div>
+                              <div>
+                                <div className="hotel-room-category-label">Reserved Room Category</div>
+                                <h4 className="hotel-room-name">
+                                  {trip.selectedRoom?.name || 'Deluxe Heritage Villa'}
+                                </h4>
+                              </div>
+                            </div>
+
+                            <span className="hotel-room-rate-badge">
+                              {formatCurrency(trip.selectedRoom?.price || trip.selectedHotel.pricePerNight)} / night
+                            </span>
+                          </div>
+
+                          <div className="hotel-room-specs-row">
+                            {trip.selectedRoom?.size && (
+                              <span className="hotel-room-spec-pill">
+                                Size: <strong>{trip.selectedRoom.size}</strong>
                               </span>
-                            ))}
+                            )}
+                            {trip.selectedRoom?.bed && (
+                              <span className="hotel-room-spec-pill">
+                                Bed: <strong>{trip.selectedRoom.bed}</strong>
+                              </span>
+                            )}
+                            {trip.selectedRoom?.maxGuests && (
+                              <span className="hotel-room-spec-pill">
+                                Capacity: <strong>Up to {trip.selectedRoom.maxGuests} Guests</strong>
+                              </span>
+                            )}
+                          </div>
+
+                          {trip.selectedRoom?.perks && trip.selectedRoom.perks.length > 0 && (
+                            <div className="hotel-room-perks-row">
+                              {trip.selectedRoom.perks.map((perk, i) => (
+                                <span key={i} className="hotel-perk-chip">
+                                  ✓ {perk}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* About this Property */}
+                        <div className="hotel-section-block">
+                          <h4 className="hotel-section-title">
+                            <Building size={18} className="text-accent" />
+                            About this Property
+                          </h4>
+                          <p className="hotel-description-text">
+                            {trip.selectedHotel.description || 'Offering scenic vistas, fine dining, and exceptional personalized hospitality for an unforgettable stay.'}
+                          </p>
+                        </div>
+
+                        {/* Included Amenities & Services */}
+                        {trip.selectedHotel.amenities && (
+                          <div className="hotel-section-block">
+                            <h4 className="hotel-section-title">
+                              <Sparkles size={18} className="text-accent" />
+                              Included Amenities & Services
+                              <span className="badge badge-accent text-3xs font-bold" style={{ marginLeft: '0.35rem' }}>
+                                {trip.selectedHotel.amenities.length} Included
+                              </span>
+                            </h4>
+                            <div className="hotel-amenities-grid">
+                              {trip.selectedHotel.amenities.map((item, i) => (
+                                <div key={i} className="hotel-amenity-card">
+                                  <CheckCircle2 size={16} className="hotel-amenity-icon" />
+                                  <span className="hotel-amenity-label">{item}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Hotel Description */}
-                      <div className="mb-6">
-                        <h4 className="heading-3 mb-2">About this Property</h4>
-                        <p className="body-text text-secondary leading-relaxed">
-                          {trip.selectedHotel.description || 'Offering scenic vistas, fine dining, and exceptional personalized hospitality for an unforgettable stay.'}
-                        </p>
-                      </div>
-
-                      {/* Amenities */}
-                      {trip.selectedHotel.amenities && (
-                        <div>
-                          <h4 className="heading-3 mb-3">Included Amenities & Services</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {trip.selectedHotel.amenities.map((item, i) => (
-                              <span key={i} className="chip text-xs">
-                                <CheckCircle2 size={13} className="text-accent" /> {item}
-                              </span>
-                            ))}
+                      {/* Right 1 Col: Sidebar with Distances & Policies */}
+                      <aside className="hotel-sidebar">
+                        {/* Landmark Proximities */}
+                        {trip.selectedHotel.distanceToLandmarks && trip.selectedHotel.distanceToLandmarks.length > 0 && (
+                          <div className="hotel-sidebar-card">
+                            <h4 className="hotel-sidebar-title">
+                              <Navigation size={15} className="icon" />
+                              Distance to Key Attractions
+                            </h4>
+                            <div className="hotel-distance-list">
+                              {trip.selectedHotel.distanceToLandmarks.map((lm, i) => (
+                                <div key={i} className="hotel-distance-item">
+                                  <span className="hotel-distance-name">{lm.landmark}</span>
+                                  <span className="hotel-distance-badge">{lm.distance}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        )}
 
-                    {/* Right 1 Col: Landmark Proximity & Policies */}
-                    <div className="space-y-4">
-                      {/* Landmark Proximities */}
-                      {trip.selectedHotel.distanceToLandmarks && (
-                        <div className="card p-4 border bg-surface-alt">
-                          <h4 className="text-xs uppercase tracking-wider font-bold text-muted mb-3 flex items-center gap-1.5">
-                            <Navigation size={14} className="text-accent" /> Distance to Key Attractions
+                        {/* Stay Policies */}
+                        <div className="hotel-sidebar-card">
+                          <h4 className="hotel-sidebar-title">
+                            <ShieldCheck size={15} className="icon" />
+                            Stay Policies & Guarantee
                           </h4>
-                          <ul className="space-y-2 text-xs">
-                            {trip.selectedHotel.distanceToLandmarks.map((lm, i) => (
-                              <li key={i} className="flex justify-between items-center py-1 border-b border-subtle">
-                                <span className="font-semibold text-primary">{lm.landmark}</span>
-                                <span className="text-muted font-mono">{lm.distance}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                          <div className="hotel-policy-row">
+                            <span className="hotel-policy-label">Standard Check-in:</span>
+                            <span className="hotel-policy-val">{trip.selectedHotel.policies?.checkIn || '02:00 PM'}</span>
+                          </div>
+                          <div className="hotel-policy-row">
+                            <span className="hotel-policy-label">Standard Check-out:</span>
+                            <span className="hotel-policy-val">{trip.selectedHotel.policies?.checkOut || '11:00 AM'}</span>
+                          </div>
+                          <div className="hotel-policy-row">
+                            <span className="hotel-policy-label">Pets Permitted:</span>
+                            <span className="hotel-policy-val">
+                              {trip.selectedHotel.policies?.petsAllowed ? 'Yes (Pet-friendly)' : 'No'}
+                            </span>
+                          </div>
 
-                      {/* Stay Policies */}
-                      <div className="card p-4 border bg-surface-alt">
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-muted mb-3 flex items-center gap-1.5">
-                          <ShieldCheck size={14} className="text-accent" /> Stay Policies
-                        </h4>
-                        <div className="space-y-2 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-muted">Check-in:</span>
-                            <strong>{trip.selectedHotel.policies?.checkIn || '02:00 PM'}</strong>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted">Check-out:</span>
-                            <strong>{trip.selectedHotel.policies?.checkOut || '11:00 AM'}</strong>
-                          </div>
-                          <div className="pt-2 border-t text-2xs text-muted">
-                            {trip.selectedHotel.policies?.cancellation || 'Free cancellation up to 48 hours prior to check-in.'}
+                          <div className="hotel-policy-guarantee">
+                            <ShieldCheck size={15} style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <span>
+                              {trip.selectedHotel.policies?.cancellation || 'Free cancellation up to 48 hours prior to check-in with 100% refund.'}
+                            </span>
                           </div>
                         </div>
-                      </div>
+                      </aside>
                     </div>
                   </div>
                 </div>
@@ -839,13 +930,13 @@ export function TripDetails() {
             ) : (
               /* HOTEL PICKER / SELECTOR VIEW */
               <div className="trip-hotel-picker-view">
-                <div className="section-header-left mb-6 flex flex-wrap justify-between items-start gap-4">
+                <div className="hotel-picker-header flex flex-wrap justify-between items-start gap-4">
                   <div>
                     <h2 className="heading-2">
                       {isChangingHotel ? 'Change Hotel Stay' : `Select Accommodation in ${trip.destinationName}`}
                     </h2>
                     <p className="subheading">
-                      Choose from {destinationHotels.length} verified stays ({trip.destinationName}). Adding a stay automatically schedules your Day 1 Check-in and logs hotel expenses in your budget.
+                      Choose from {destinationHotels.length} verified stays in {trip.destinationName}. Adding a stay automatically schedules your Day 1 Check-in and logs hotel expenses in your budget.
                     </p>
                   </div>
 
@@ -853,30 +944,29 @@ export function TripDetails() {
                     <button
                       type="button"
                       onClick={() => setIsChangingHotel(false)}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-outline btn-sm flex items-center gap-1.5"
                     >
-                      ← Keep Current Hotel ({trip.selectedHotel?.name})
+                      ← Keep Current Stay ({trip.selectedHotel?.name})
                     </button>
                   )}
                 </div>
 
                 {/* Search & Filter Toolbar */}
-                <div className="card p-4 mb-6">
-                  <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                    <div className="search-input-wrapper flex-1" style={{ minWidth: '220px' }}>
-                      <Search size={15} className="search-input-icon" />
+                <div className="hotel-picker-toolbar">
+                  <div className="hotel-search-row">
+                    <div className="hotel-search-input-box">
+                      <Search size={16} className="search-icon" />
                       <input
                         type="text"
-                        placeholder="Search hotel name, location..."
-                        className="form-input search-input-with-icon"
+                        placeholder="Search hotel name, location, luxury, retreat..."
+                        className="hotel-search-input"
                         value={hotelSearchQuery}
                         onChange={(e) => setHotelSearchQuery(e.target.value)}
                       />
                     </div>
 
                     <select
-                      className="form-input form-select"
-                      style={{ width: 'auto', minWidth: '200px' }}
+                      className="hotel-sort-select"
                       value={hotelSortOrder}
                       onChange={(e) => setHotelSortOrder(e.target.value)}
                     >
@@ -888,14 +978,14 @@ export function TripDetails() {
                   </div>
 
                   {/* Budget Filter Pills */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-2xs font-bold text-muted uppercase mr-1">Price Tier:</span>
+                  <div className="hotel-tier-filters">
+                    <span className="hotel-tier-label">Price Filter:</span>
                     {HOTEL_BUDGET_TIERS.map((tier) => (
                       <button
                         key={tier.id}
                         type="button"
                         onClick={() => setHotelFilterTier(tier.id)}
-                        className={`chip text-2xs ${hotelFilterTier === tier.id ? 'chip-active' : ''}`}
+                        className={`hotel-tier-pill ${hotelFilterTier === tier.id ? 'active' : ''}`}
                       >
                         {tier.label}
                       </button>
@@ -905,7 +995,7 @@ export function TripDetails() {
 
                 {/* Hotels Grid */}
                 {destinationHotels.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="hotel-picker-grid">
                     {destinationHotels.map((hotel) => {
                       const isCurrentlySelected = trip.selectedHotel?.id === hotel.id;
                       const totalCost = hotel.pricePerNight * (trip.daysCount || 1);
@@ -913,66 +1003,63 @@ export function TripDetails() {
                       return (
                         <div
                           key={hotel.id}
-                          className={`card hotel-card-trip flex flex-col overflow-hidden transition-all ${
-                            isCurrentlySelected ? 'border-accent shadow-md' : ''
-                          }`}
+                          className={`hotel-card-trip ${isCurrentlySelected ? 'active-hotel' : ''}`}
                         >
-                          <div className="relative" style={{ height: '170px' }}>
+                          <div className="hotel-card-media">
                             <img
                               src={hotel.heroImage}
                               alt={hotel.name}
-                              className="w-full h-full object-cover"
+                              className="hotel-card-img"
                               loading="lazy"
                             />
                             {hotel.badge && (
-                              <span className="badge badge-accent absolute top-3 left-3 text-3xs font-bold">
+                              <span className="hotel-card-badge-top" title={hotel.badge}>
                                 {hotel.badge}
                               </span>
                             )}
-                            <span className="badge badge-rating absolute top-3 right-3 text-2xs font-bold">
-                              <Star size={11} fill="currentColor" /> {hotel.rating}
+                            <span className="hotel-card-rating-top">
+                              <Star size={12} fill="currentColor" /> {hotel.rating}
                             </span>
                           </div>
 
-                          <div className="p-4 flex flex-col flex-1">
-                            <div className="flex justify-between items-start mb-1">
-                              <span className="text-3xs uppercase font-bold text-accent tracking-wider">
+                          <div className="hotel-card-content">
+                            <div className="hotel-card-top-meta">
+                              <span className="hotel-card-type">
                                 {hotel.type || 'Hotel'}
                               </span>
-                              <span className="text-2xs text-muted">
-                                ₹{hotel.pricePerNight.toLocaleString('en-IN')}/night
+                              <span className="hotel-card-price-night">
+                                ₹{hotel.pricePerNight.toLocaleString('en-IN')}<span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>/night</span>
                               </span>
                             </div>
 
-                            <h4 className="font-bold text-base mb-1 text-primary line-clamp-1" title={hotel.name}>
+                            <h4 className="hotel-card-name" title={hotel.name}>
                               {hotel.name}
                             </h4>
-                            <p className="text-xs text-muted line-clamp-1 mb-3">
-                              {hotel.nearLocation}
+                            <p className="hotel-card-location" title={hotel.nearLocation || hotel.address}>
+                              <MapPin size={12} className="text-accent" style={{ flexShrink: 0 }} />
+                              <span>{hotel.nearLocation || hotel.address}</span>
                             </p>
 
                             {/* Distance to Nearest Landmark */}
                             {hotel.distanceToLandmarks && hotel.distanceToLandmarks[0] && (
-                              <div className="text-2xs text-muted bg-surface-alt p-2 rounded mb-4 flex items-center justify-between">
+                              <div className="hotel-card-landmark-tag">
                                 <span>{hotel.distanceToLandmarks[0].landmark}</span>
-                                <strong className="text-primary">{hotel.distanceToLandmarks[0].distance}</strong>
+                                <strong>{hotel.distanceToLandmarks[0].distance}</strong>
                               </div>
                             )}
 
-                            <div className="mt-auto pt-3 border-t flex items-center justify-between gap-2">
-                              <div>
-                                <span className="text-3xs text-muted block">{trip.daysCount} Nights Total:</span>
-                                <strong className="text-sm font-bold text-primary">{formatCurrency(totalCost)}</strong>
+                            <div className="hotel-card-footer">
+                              <div className="hotel-card-total-cost">
+                                <span className="duration">{trip.daysCount} Nights Total:</span>
+                                <span className="total-amount">{formatCurrency(totalCost)}</span>
                               </div>
 
                               <button
                                 type="button"
                                 onClick={() => handleSelectHotel(hotel)}
-                                className={`btn btn-xs ${
-                                  isCurrentlySelected ? 'btn-primary font-bold' : 'btn-outline'
-                                }`}
+                                className={`hotel-card-select-btn ${isCurrentlySelected ? 'selected' : 'unselected'}`}
                               >
-                                {isCurrentlySelected ? '✓ Currently Selected' : 'Select & Link Stay'}
+                                {isCurrentlySelected ? '✓ Selected Stay' : 'Select & Link Stay'}
                               </button>
                             </div>
                           </div>
