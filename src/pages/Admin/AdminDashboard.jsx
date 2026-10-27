@@ -369,6 +369,16 @@ export function AdminDashboard() {
     if (window.confirm(`Are you sure you want to delete itinerary "${tripTitle}"?`)) {
       const updated = userTrips.filter((t) => t.id !== tripId);
       localStorage.setItem('tripcanvas_user_trips', JSON.stringify(updated));
+      try {
+        const rawDeleted = JSON.parse(localStorage.getItem('tripcanvas_deleted_trip_ids') || '[]');
+        if (!rawDeleted.includes(tripId)) {
+          rawDeleted.push(tripId);
+          localStorage.setItem('tripcanvas_deleted_trip_ids', JSON.stringify(rawDeleted));
+        }
+        localStorage.setItem('tripcanvas_trips_seeded', 'true');
+      } catch (e) {
+        // ignore
+      }
       window.dispatchEvent(new Event('storage'));
       logAdminAction('Deleted Trip', `Removed itinerary "${tripTitle}" (${tripId})`);
       showToast(`Itinerary deleted`, 'info');

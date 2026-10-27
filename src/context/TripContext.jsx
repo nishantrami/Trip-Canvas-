@@ -7,31 +7,80 @@ import { SAMPLE_GIR_TRIP, generateFallbackTrip } from '../data/defaultTrips';
 
 const TripContext = createContext();
 
-const INITIAL_TRIPS = [SAMPLE_GIR_TRIP];
+const DELETED_TRIPS_KEY = 'tripcanvas_deleted_trip_ids';
+const SEEDED_KEY = 'tripcanvas_trips_seeded';
+
+// Helper to determine initial trips safely without resurrecting deleted trips
+const getInitialTrips = () => {
+  try {
+    const rawDeleted = window.localStorage.getItem(DELETED_TRIPS_KEY);
+    const deletedIds = rawDeleted ? JSON.parse(rawDeleted) : [];
+    const isSeeded = window.localStorage.getItem(SEEDED_KEY);
+    const existing = window.localStorage.getItem('tripcanvas_user_trips');
+
+    if (existing !== null) {
+      const parsed = JSON.parse(existing);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(
+          (t) =>
+            t &&
+            t.id !== 'trip_udaipur_01' &&
+            t.id !== 'trip_goa_02' &&
+            !deletedIds.includes(t.id)
+        );
+      }
+    }
+
+    // First time visitor: seed default sample trip if not previously deleted
+    if (!isSeeded && !deletedIds.includes('trip_muv1212y_o3ydx')) {
+      window.localStorage.setItem(SEEDED_KEY, 'true');
+      return [SAMPLE_GIR_TRIP];
+    }
+
+    return [];
+  } catch (e) {
+    return [];
+  }
+};
 
 export function TripProvider({ children }) {
-  const [trips, setTrips] = useLocalStorage('tripcanvas_user_trips', INITIAL_TRIPS);
+  const [trips, setTrips] = useLocalStorage('tripcanvas_user_trips', getInitialTrips);
   const { showToast } = useToast();
 
-  // Ensure SAMPLE_GIR_TRIP is present and clean legacy mocks
+  // Clean legacy mocks and ensure deleted trips are never rendered
   React.useEffect(() => {
     setTrips((prev) => {
-      if (!Array.isArray(prev) || prev.length === 0) {
-        return [SAMPLE_GIR_TRIP];
+      if (!Array.isArray(prev)) return [];
+      let rawDeleted = [];
+      try {
+        rawDeleted = JSON.parse(window.localStorage.getItem(DELETED_TRIPS_KEY) || '[]');
+      } catch (e) {
+        rawDeleted = [];
       }
-      let updated = prev.filter(
-        (t) => t && t.id !== 'trip_udaipur_01' && t.id !== 'trip_goa_02'
+      return prev.filter(
+        (t) =>
+          t &&
+          t.id !== 'trip_udaipur_01' &&
+          t.id !== 'trip_goa_02' &&
+          !rawDeleted.includes(t.id)
       );
-      if (!updated.some((t) => t.id === 'trip_muv1212y_o3ydx')) {
-        updated = [SAMPLE_GIR_TRIP, ...updated];
-      }
-      return updated;
     });
   }, [setTrips]);
 
   const getTripById = useCallback(
     (tripId) => {
       if (!tripId) return null;
+
+      // Check if this trip was explicitly deleted
+      try {
+        const deleted = JSON.parse(window.localStorage.getItem(DELETED_TRIPS_KEY) || '[]');
+        if (deleted.includes(tripId)) {
+          return null;
+        }
+      } catch (e) {
+        // ignore
+      }
+
       let found = trips.find((t) => t.id === tripId);
       if (found) return found;
 
@@ -47,16 +96,6 @@ export function TripProvider({ children }) {
         }
       } catch (e) {
         // ignore parse error
-      }
-
-      // Check if it matches the specific Gir trip requested
-      if (tripId === 'trip_muv1212y_o3ydx' || tripId.includes('muv1212y')) {
-        return SAMPLE_GIR_TRIP;
-      }
-
-      // If any other trip_ ID is requested, provide fallback so the route opens gracefully
-      if (tripId.startsWith('trip_')) {
-        return generateFallbackTrip(tripId);
       }
 
       return null;
@@ -254,7 +293,29 @@ export function TripProvider({ children }) {
 
   const deleteTrip = useCallback(
     (tripId) => {
-      setTrips((prev) => prev.filter((t) => t.id !== tripId));
+      // Record deleted trip ID in localStorage so it stays deleted on reload
+      try {
+        const rawDeleted = window.localStorage.getItem(DELETED_TRIPS_KEY);
+        const deletedIds = rawDeleted ? JSON.parse(rawDeleted) : [];
+        if (!deletedIds.includes(tripId)) {
+          deletedIds.push(tripId);
+          window.localStorage.setItem(DELETED_TRIPS_KEY, JSON.stringify(deletedIds));
+        }
+        window.localStorage.setItem(SEEDED_KEY, 'true');
+      } catch (e) {
+        console.warn('Error saving deleted trip id:', e);
+      }
+
+      setTrips((prev) => {
+        const remaining = prev.filter((t) => t.id !== tripId);
+        try {
+          window.localStorage.setItem('tripcanvas_user_trips', JSON.stringify(remaining));
+        } catch (e) {
+          // ignore
+        }
+        return remaining;
+      });
+
       showToast('Trip deleted', 'info');
     },
     [setTrips, showToast]
